@@ -1,22 +1,61 @@
 Vagrant.configure("2") do |config|
   config.vm.box = "generic/debian12"
-  
-  config.vm.synced_folder ".", "/vagrant",
-    disabled: true
-  config.vm.synced_folder "./scripts", "/scripts",
-    create: true
+
+  config.vm.synced_folder ".", "/vagrant", disabled: true
+  config.vm.synced_folder "./scripts", "/var/www/html", create: true
+  config.vm.synced_folder "./confs", "/confs", create: true
 
   config.vm.define "etaquetS" do |control|
     control.vm.hostname = "etaquetS"
+
     control.vm.network "private_network", ip: "192.168.56.110"
     control.vm.network "forwarded_port", guest: 6443, host: 16443
-    control.vm.provider "libvirt" do |v|
-      v.memory = "512"
-      v.cpus = 1
+
+    control.vm.provider :libvirt do |v|
+      v.memory = 2048
+      v.cpus = 2
     end
+
     control.vm.provision "shell", inline: <<-SHELL
-      apt-get -y update; apt-get -y install curl
-      curl -sfL https://get.k3s.io | sh -s - server --flannel-backend vxlan --token "password"
+      set -e
+
+      apt-get update -y
+      apt-get install -y curl
+
+      curl -sfL https://get.k3s.io | sh -s - server \
+        --flannel-backend vxlan \
+        --token "password" \
+        --write-kubeconfig-mode=644 \
+        --disable=traefik
+
+      export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
+
+      echo "===> Waiting for node..."
+      until kubectl get nodes 2>/dev/null | grep -q " Ready"; do
+        sleep 5
+      done
+
+      echo "===> Installing ingress-nginx..."
+      kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.10.1/deploy/static/provider/baremetal/deploy.yaml
+
+      kubectl rollout status deployment ingress-nginx-controller -n ingress-nginx --timeout=300s
+
+      echo "===> Enabling hostNetwork..."
+      kubectl patch deployment ingress-nginx-controller -n ingress-nginx \
+        -p '{"spec":{"template":{"spec":{"hostNetwork":true,"dnsPolicy":"ClusterFirstWithHostNet"}}}}'
+
+      kubectl rollout restart deployment ingress-nginx-controller -n ingress-nginx
+      kubectl rollout status deployment ingress-nginx-controller -n ingress-nginx --timeout=300s
+
+      echo "===> Deploying apps..."
+      kubectl apply -f /confs/app1.yaml
+      kubectl apply -f /confs/app2.yaml
+      kubectl apply -f /confs/app3.yaml
+
+      echo "===> Deploying ingress..."
+      kubectl apply -f /confs/ingress.yaml
+
+      echo "===> ALL DONE"
     SHELL
   end
 end
