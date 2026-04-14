@@ -1,12 +1,22 @@
-all:
-	vagrant up --provider virtualbox
+up:
+	vagrant up --provider libvirt
+
+down:
+	@vagrant halt
+
+restart: down up
+
+status:
+	@vagrant status
 
 clean:
-	vagrant destroy -f
-	rm -rf .vagrant
-# 	vagrant box remove debian/bookworm64 --all
+	@vagrant destroy -f
 
-re: clean all
+fclean: clean
+	rm -rf .vagrant
+
+
+re: fclean up
 
 # dependencies:
 # 	apt install -y vagrant
