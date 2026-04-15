@@ -1,0 +1,118 @@
+#!/bin/bash
+# ===============================================================
+#  EEEEE    M   M     A     I    L        L        EEEEE    TTTTT
+#  E        MM MM    A A    I    L        L        E          T
+#  EEEE     M M M   AAAAA   I    L        L        EEEE       T
+#  E        M   M   A   A   I    L        L        E          T
+#  EEEEE    M   M   A   A   I    LLLLL    LLLLL    EEEEE      T
+# ===============================================================
+
+#On récupère le chemin absolu du dossier dans lequel se trouve CE script
+SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
+
+
+#Demande le passage a sudo au prealable pour eviter les demandes de mot de passe en plein milieu de l'installation
+sudo echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m Installation en cours, veuillez patienter... \033[0m"
+
+bash "$SCRIPT_DIR/dependency-check.sh"
+
+# ===============================================================
+# K3D
+# ===============================================================
+
+echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m [*] Nettoyage des ressources existantes... \033[0m"
+sudo k3d cluster delete inception-of-things 2>/dev/null && echo -e "\033[48;2;0;128;0m\033[38;2;255;255;255m ✓ Ancien cluster supprimé \033[0m"
+
+#Installation de k3d
+bash "$SCRIPT_DIR/k3d_install.sh" && echo -e "\033[48;2;0;128;0m\033[38;2;255;255;255m ✓ k3d installé ! \033[0m"
+
+#On cree un cluster k3d
+sudo k3d cluster create inception-of-things --agents 2 --port "80:80@loadbalancer" --port "443:443@loadbalancer" --port "8080:8080@loadbalancer" && echo -e "\033[48;2;0;128;0m\033[38;2;255;255;255m ✓ Cluster k3d créé ! \033[0m"
+
+# Configuration du kubeconfig pour le cluster k3d
+echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m [*] Configuration du kubeconfig... \033[0m"
+mkdir -p ~/.kube
+sudo k3d kubeconfig get inception-of-things > ~/.kube/config
+chmod 600 ~/.kube/config
+sleep 1
+
+# Vérifier que kubectl fonctionne
+counter=1
+until kubectl cluster-info &>/dev/null; do
+    if [ $counter -gt 10 ]; then
+        echo -e "\033[48;2;200;100;0m\033[38;2;255;255;255m ! Kubectl indisponible \033[0m"
+        break
+    fi
+    echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m  [Essaie $counter] En attente de kubectl... \033[0m"
+    ((counter++))
+    sleep 1
+done
+echo -e "\033[48;2;0;128;0m\033[38;2;255;255;255m ✓ Kubeconfig configuré ! \033[0m"
+
+#On cree le premier namespace pour ArgoCD
+kubectl create namespace argocd 2>/dev/null && echo -e "\033[48;2;0;128;0m\033[38;2;255;255;255m ✓ Namespace argocd créé ! \033[0m"
+
+#On cree le second namespace 'dev'
+kubectl create namespace dev 2>/dev/null && echo -e "\033[48;2;0;128;0m\033[38;2;255;255;255m ✓ Namespace dev créé ! \033[0m"
+
+export counter=1
+
+until [ $(k3d node list | wc -l) -ge 3 ]; do
+    echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m [Essaie $counter] En attente de tous les nœuds... \033[0m"
+    ((counter++))
+    sleep 2
+done
+
+echo -e "\033[48;2;0;128;0m\033[38;2;255;255;255m ✓ Tous les nœuds sont prêts ! \033[0m"
+
+# Attendre que kubectl soit complètement fonctionnel
+echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m [*] Attente de la disponibilité de l'API Kubernetes... \033[0m"
+counter=1
+until kubectl cluster-info &>/dev/null; do
+    echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m  [Essaie $counter] En attente de l'API... \033[0m"
+    ((counter++))
+    sleep 2
+done
+echo -e "\033[48;2;0;128;0m\033[38;2;255;255;255m ✓ API Kubernetes opérationnelle ! \033[0m"
+
+# ===============================================================
+# HELM & argocd
+# ===============================================================
+
+#Instalation de helm pour k3d
+bash "$SCRIPT_DIR/helm_install.sh" && echo -e "\033[48;2;0;128;0m\033[38;2;255;255;255m ✓ Helm installé ! \033[0m"
+
+#Installation d'ArgoCD via helm
+bash "$SCRIPT_DIR/argocd_install.sh" && echo -e "\033[48;2;0;128;0m\033[38;2;255;255;255m ✓ ArgoCD installé ! \033[0m"
+
+# Attendre qu'ArgoCD soit prêt
+echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m [*] En attente d'ArgoCD... \033[0m"
+counter=1
+until sudo kubectl rollout status deployment/argocd-server -n argocd --timeout=5s &>/dev/null; do
+    if [ $counter -gt 30 ]; then
+        echo -e "\033[48;2;200;100;0m\033[38;2;255;255;255m ! Timeout en attendant ArgoCD \033[0m"
+        break
+    fi
+    echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m  [Essaie $counter] ArgoCD en préparation... \033[0m"
+    ((counter++))
+    sleep 2
+done
+
+# Port-forward pour ArgoCD
+echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m [*] Configuration du port-forward ArgoCD... \033[0m"
+nohup sudo kubectl port-forward -n argocd svc/argocd-server 8081:80 --address=127.0.0.1 >/dev/null 2>&1 &
+sleep 3
+
+echo -e "\033[48;2;0;128;0m\033[38;2;255;255;255m ✓ ArgoCD accessible sur http://localhost:8081 \033[0m"
+
+
+# ===============================================================
+# Utilitaires / TUI
+# ===============================================================
+
+bash "$SCRIPT_DIR/k9s_install.sh" && echo -e "\033[48;2;0;128;0m\033[38;2;255;255;255m ✓ k9s installé ! \033[0m"
+
+echo ""
+echo -e "\033[48;2;0;128;0m\033[38;2;255;255;255m ✓ Installation terminée avec succès ! \033[0m"
+echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m Services accessibles : \033[0m"
+echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m  - ArgoCD: http://localhost:8081 \033[0m"
