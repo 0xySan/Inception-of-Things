@@ -8,6 +8,19 @@
 # ===============================================================
 
 # Telechargement et installation d'ArgoCD via helm
-helm repo add argo https://argoproj.github.io/argo-helm
-helm repo update
-helm install argocd argo/argo-cd -n argocd --create-namespace
+
+# Ajouter le repo Helm d'ArgoCD
+echo "Ajout du repo Helm ArgoCD..."
+sudo helm repo add argo https://argoproj.github.io/argo-helm || echo "Repo bereits existant"
+
+# Mettre à jour les repos
+echo "Mise à jour des repos Helm..."
+sudo helm repo update
+
+# Installer ArgoCD
+echo "Installation d'ArgoCD..."
+sudo helm install argocd argo/argo-cd -n argocd --create-namespace
+
+# Vérifier l'installation
+echo "Vérification de l'installation..."
+sudo helm list -n argocd

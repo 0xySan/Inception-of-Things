@@ -38,7 +38,7 @@ sleep 1
 
 # Vérifier que kubectl fonctionne
 counter=1
-until kubectl cluster-info &>/dev/null; do
+until sudo kubectl cluster-info &>/dev/null; do
     if [ $counter -gt 10 ]; then
         echo -e "\033[48;2;200;100;0m\033[38;2;255;255;255m ! Kubectl indisponible \033[0m"
         break
@@ -50,14 +50,14 @@ done
 echo -e "\033[48;2;0;128;0m\033[38;2;255;255;255m ✓ Kubeconfig configuré ! \033[0m"
 
 #On cree le premier namespace pour ArgoCD
-kubectl create namespace argocd 2>/dev/null && echo -e "\033[48;2;0;128;0m\033[38;2;255;255;255m ✓ Namespace argocd créé ! \033[0m"
+sudo kubectl create namespace argocd 2>/dev/null && echo -e "\033[48;2;0;128;0m\033[38;2;255;255;255m ✓ Namespace argocd créé ! \033[0m"
 
 #On cree le second namespace 'dev'
-kubectl create namespace dev 2>/dev/null && echo -e "\033[48;2;0;128;0m\033[38;2;255;255;255m ✓ Namespace dev créé ! \033[0m"
+sudo kubectl create namespace dev 2>/dev/null && echo -e "\033[48;2;0;128;0m\033[38;2;255;255;255m ✓ Namespace dev créé ! \033[0m"
 
 export counter=1
 
-until [ $(k3d node list | wc -l) -ge 3 ]; do
+until [ $(sudo k3d node list | wc -l) -ge 3 ]; do
     echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m [Essaie $counter] En attente de tous les nœuds... \033[0m"
     ((counter++))
     sleep 2
@@ -68,7 +68,7 @@ echo -e "\033[48;2;0;128;0m\033[38;2;255;255;255m ✓ Tous les nœuds sont prêt
 # Attendre que kubectl soit complètement fonctionnel
 echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m [*] Attente de la disponibilité de l'API Kubernetes... \033[0m"
 counter=1
-until kubectl cluster-info &>/dev/null; do
+until sudo kubectl cluster-info &>/dev/null; do
     echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m  [Essaie $counter] En attente de l'API... \033[0m"
     ((counter++))
     sleep 2
@@ -85,25 +85,35 @@ bash "$SCRIPT_DIR/helm_install.sh" && echo -e "\033[48;2;0;128;0m\033[38;2;255;2
 #Installation d'ArgoCD via helm
 bash "$SCRIPT_DIR/argocd_install.sh" && echo -e "\033[48;2;0;128;0m\033[38;2;255;255;255m ✓ ArgoCD installé ! \033[0m"
 
-# Attendre qu'ArgoCD soit prêt
-echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m [*] En attente d'ArgoCD... \033[0m"
+# Attendre qu'ArgoCD soit complètement prêt
+echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m [*] En attente du déploiement d'ArgoCD... \033[0m"
 counter=1
-until sudo kubectl rollout status deployment/argocd-server -n argocd --timeout=5s &>/dev/null; do
-    if [ $counter -gt 30 ]; then
-        echo -e "\033[48;2;200;100;0m\033[38;2;255;255;255m ! Timeout en attendant ArgoCD \033[0m"
+until sudo kubectl get pods -n argocd -l app.kubernetes.io/name=argocd-server --no-headers | grep -q Running; do
+    if [ $counter -gt 120 ]; then
+        echo -e "\033[48;2;200;100;0m\033[38;2;255;255;255m ! Timeout en attendant les pods ArgoCD \033[0m"
+        echo -e "\033[48;2;200;100;0m\033[38;2;255;255;255m Pods actuels : \033[0m"
+        sudo kubectl get pods -n argocd
         break
     fi
-    echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m  [Essaie $counter] ArgoCD en préparation... \033[0m"
+    # Afficher un point au lieu d'un message long
+    if [ $((counter % 5)) -eq 0 ]; then
+        echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m  [$counter/120] Attente... \033[0m"
+    fi
     ((counter++))
-    sleep 2
+    sleep 1
 done
 
-# Port-forward pour ArgoCD
-echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m [*] Configuration du port-forward ArgoCD... \033[0m"
-nohup sudo kubectl port-forward -n argocd svc/argocd-server 8081:80 --address=127.0.0.1 >/dev/null 2>&1 &
-sleep 3
-
-echo -e "\033[48;2;0;128;0m\033[38;2;255;255;255m ✓ ArgoCD accessible sur http://localhost:8081 \033[0m"
+if [ $counter -le 120 ]; then
+    echo -e "\033[48;2;0;128;0m\033[38;2;255;255;255m ✓ Tous les pods ArgoCD sont prêts ! \033[0m"
+    
+    # Port-forward pour ArgoCD
+    echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m [*] Configuration du port-forward ArgoCD... \033[0m"
+    nohup sudo kubectl port-forward -n argocd svc/argocd-server 8081:80 --address=127.0.0.1 >/dev/null 2>&1 &
+    sleep 2
+    echo -e "\033[48;2;0;128;0m\033[38;2;255;255;255m ✓ ArgoCD accessible sur http://localhost:8081 \033[0m"
+else
+    echo -e "\033[48;2;200;100;0m\033[38;2;255;255;255m ⚠ ArgoCD ne s'est pas lancé correctement - vérifiez avec: sudo kubectl get pods -n argocd \033[0m"
+fi
 
 
 # ===============================================================
