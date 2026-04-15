@@ -4,9 +4,19 @@ all:
 clean:
 	vagrant destroy -f
 	rm -rf .vagrant
-# 	vagrant box remove debian/bookworm64 --all
+
+fclean: clean
+	vagrant box remove generic/debian12 --all
 
 re: clean all
 
+reload:
+	vagrant up --provider=libvirt --provision
+
+setup:
+	vagrant plugin install vagrant-libvirt
+
 # dependencies:
 # 	apt install -y vagrant
+
+.PHONY: all clean re reload setup fclean

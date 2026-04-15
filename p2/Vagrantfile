@@ -28,7 +28,8 @@ Vagrant.configure("2") do |config|
         --write-kubeconfig-mode=644 \
         --disable=traefik
 
-      export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
+      echo "===> Added alias 'k' for kubectl"
+      echo "alias k=kubectl" >> /home/vagrant/.bashrc
 
       echo "===> Waiting for node..."
       until kubectl get nodes 2>/dev/null | grep -q " Ready"; do
@@ -51,10 +52,10 @@ Vagrant.configure("2") do |config|
       kubectl apply -f /confs/app1.yaml
       kubectl apply -f /confs/app2.yaml
       kubectl apply -f /confs/app3.yaml
-
+      
       echo "===> Deploying ingress..."
       kubectl apply -f /confs/ingress.yaml
-
+      
       echo "===> ALL DONE"
     SHELL
   end

@@ -25,6 +25,7 @@ spec:
           sed -i "s|__APP_MESSAGE__|Hello from app1.|g" /work/index.html
           sed -i "s|__POD_NAME__|${POD_NAME}|g" /work/index.html
           sed -i "s|__NODE_NAME__|${NODE_NAME}|g" /work/index.html
+          sed -i "s|__POD_IP__|$POD_IP|g" /work/index.html
         env:
         - name: POD_NAME
           valueFrom:
@@ -34,6 +35,10 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: spec.nodeName
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
         volumeMounts:
         - name: html-template
           mountPath: /template
