@@ -23,6 +23,7 @@ Vagrant.configure("2") do |config|
     control.vm.provision "shell", env: {"K3S_TOKEN" => token}, inline: <<-SHELL
       apt-get -y update; apt-get -y install curl
       curl -sfL https://get.k3s.io | K3S_TOKEN=$K3S_TOKEN sh -s - server
+      echo '#!/bin/bash\nk3s kubectl "$@"' > /usr/local/bin/k && chmod +x /usr/local/bin/k
     SHELL
   end
 
@@ -37,6 +38,7 @@ Vagrant.configure("2") do |config|
     control.vm.provision "shell", env: {"K3S_TOKEN" => token}, inline: <<-SHELL
       apt-get -y update; apt-get -y install curl
       curl -sfL https://get.k3s.io | K3S_TOKEN=$K3S_TOKEN sh -s - agent --server "https://192.168.56.110:6443"
+      echo '#!/bin/bash\nk3s kubectl "$@"' > /usr/local/bin/k && chmod +x /usr/local/bin/k
     SHELL
   end
 end
