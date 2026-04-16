@@ -1,12 +1,14 @@
 token = ENV["K3S_TOKEN"] || "password"
 
 Vagrant.configure("2") do |config|
-  config.vm.box = "generic/debian12"
-  # config.vm.box_url = "https://vagrantcloud.com/debian/boxes/bookworm64/versions/12.20250126.1/providers/virtualbox/amd64/vagrant.box"
+  config.vm.box = "debian/trixie64"
   
   config.vm.synced_folder ".", "/vagrant",
     disabled: true
   config.vm.synced_folder "./scripts", "/scripts",
+    create: true,
+    type: "rsync"
+  config.vm.synced_folder "./confs", "/confs",
     create: true,
     type: "rsync"
 
@@ -14,7 +16,7 @@ Vagrant.configure("2") do |config|
     control.vm.hostname = "artgirarS"
     control.vm.network "private_network", ip: "192.168.56.110"
     control.vm.provider "libvirt" do |v|
-      v.memory = 512
+      v.memory = 1024
       v.cpus = 1
       v.driver = "kvm"
     end
