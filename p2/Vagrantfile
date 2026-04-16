@@ -1,3 +1,5 @@
+token = ENV["K3S_TOKEN"] || "password"
+
 Vagrant.configure("2") do |config|
   config.vm.box = "debian/trixie64"
 
@@ -16,7 +18,7 @@ Vagrant.configure("2") do |config|
       v.cpus = 2
     end
 
-    control.vm.provision "shell", inline: <<-SHELL
+    control.vm.provision "shell", env: {"K3S_TOKEN" => token}, inline: <<-SHELL
       set -e
 
       apt-get update -y
@@ -24,7 +26,7 @@ Vagrant.configure("2") do |config|
 
       curl -sfL https://get.k3s.io | sh -s - server \
         --flannel-backend vxlan \
-        --token "password" \
+        --token "#{token}" \
         --write-kubeconfig-mode=644 \
         --disable=traefik
 

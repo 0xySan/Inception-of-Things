@@ -1,22 +1,27 @@
+flags = 2>&1 | grep -v '\[fog\]\[WARNING\]'
+
 all:
-	vagrant up --provider=libvirt
+	@echo "===> Starting Vagrant machines..."
+	@vagrant up --provider=libvirt $(flags)
 
 clean:
-	vagrant destroy -f
-	rm -rf .vagrant
+	@echo "===> Destroying Vagrant machines..."
+	@vagrant destroy -f $(flags)
+	@echo "===> Removing Vagrant boxes..."
+	@rm -rf .vagrant
 
 fclean: clean
-	vagrant box remove generic/debian12 --all
+	@echo "===> Removing Vagrant boxes..."
+	@vagrant box remove debian/trixie64 --all
 
 re: clean all
 
 reload:
-	vagrant up --provider=libvirt --provision
+	@echo "===> Reloading Vagrant machines..."
+	@vagrant up --provider=libvirt --provision $(flags)
 
 setup:
-	vagrant plugin install vagrant-libvirt
-
-# dependencies:
-# 	apt install -y vagrant
+	@echo "===> Installing Vagrant libvirt plugin..."
+	@vagrant plugin install vagrant-libvirt
 
 .PHONY: all clean re reload setup fclean
