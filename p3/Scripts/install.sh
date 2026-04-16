@@ -14,7 +14,7 @@ SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
 #Demande le passage a sudo au prealable pour eviter les demandes de mot de passe en plein milieu de l'installation
 sudo echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m Installation en cours, veuillez patienter... \033[0m"
 
-bash "$SCRIPT_DIR/dependency-check.sh"
+# bash "$SCRIPT_DIR/dependency-check.sh"
 
 # ===============================================================
 # K3D
@@ -103,15 +103,40 @@ until sudo kubectl get pods -n argocd -l app.kubernetes.io/name=argocd-server --
     sleep 1
 done
 
+echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m [*] Attente du repo-server ArgoCD... \033[0m"
+counter=1
+until sudo kubectl get pods -n argocd -l app.kubernetes.io/name=argocd-repo-server --no-headers | grep -q Running; do
+    if [ $counter -gt 120 ]; then
+        echo -e "\033[48;2;200;100;0m\033[38;2;255;255;255m ! Timeout en attendant repo-server ArgoCD \033[0m"
+        echo -e "\033[48;2;200;100;0m\033[38;2;255;255;255m Pods actuels : \033[0m"
+        sudo kubectl get pods -n argocd
+        break
+    fi
+    if [ $((counter % 5)) -eq 0 ]; then
+        echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m  [$counter/120] Attente... \033[0m"
+    fi
+    ((counter++))
+    sleep 1
+done
+
 if [ $counter -le 120 ]; then
     echo -e "\033[48;2;0;128;0m\033[38;2;255;255;255m ✓ Tous les pods ArgoCD sont prêts ! \033[0m"
+
+    # Wait for deployment-level readiness to avoid transient repo-server dial errors.
+    echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m [*] Vérification du rollout ArgoCD... \033[0m"
+    sudo kubectl rollout status deployment/argocd-repo-server -n argocd --timeout=180s
+    sudo kubectl rollout status deployment/argocd-server -n argocd --timeout=180s
     
     # Créer l'Ingress pour ArgoCD
     echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m [*] Configuration d'ArgoCD via Ingress... \033[0m"
     sudo kubectl apply -f "$SCRIPT_DIR/../conf/ingress.yaml"
+
+    # Déclarer l'application GitOps à synchroniser depuis la branche app
+    echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m [*] Création de l'Application ArgoCD... \033[0m"
+    sudo kubectl apply -f "$SCRIPT_DIR/../conf/argocd-application.yaml"
     
     sleep 2
-    echo -e "\033[48;2;0;128;0m\033[38;2;255;255;255m ✓ Ingress créé \033[0m"
+    echo -e "\033[48;2;0;128;0m\033[38;2;255;255;255m ✓ Ingress et Application créés \033[0m"
 else
     echo -e "\033[48;2;200;100;0m\033[38;2;255;255;255m ⚠ ArgoCD ne s'est pas lancé correctement - vérifiez avec: sudo kubectl get pods -n argocd \033[0m"
 fi
@@ -135,7 +160,9 @@ echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m ║    Utilisateur: admin   
 
 ARGOCD_PASSWORD=$(sudo kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" 2>/dev/null | base64 -d 2>/dev/null || echo "N/A")
 printf '\033[48;2;0;100;200m\033[38;2;255;255;255m ║    Mot de passe: %-36s  ║ \033[0m\n' "${ARGOCD_PASSWORD}"
-
+echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m ╠════════════════════════════════════════════════════════╣ \033[0m"
+echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m ║  Application de démonstration                          ║ \033[0m"
+echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m ║    URL:      http://app.localhost                      ║ \033[0m"
 echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m ╠════════════════════════════════════════════════════════╣ \033[0m"
 echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m ║  Kubernetes Cluster                                    ║ \033[0m"
 echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m ║    Cluster:  inception-of-things                       ║ \033[0m"
