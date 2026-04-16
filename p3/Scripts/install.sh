@@ -106,11 +106,12 @@ done
 if [ $counter -le 120 ]; then
     echo -e "\033[48;2;0;128;0m\033[38;2;255;255;255m ✓ Tous les pods ArgoCD sont prêts ! \033[0m"
     
-    # Port-forward pour ArgoCD
-    echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m [*] Configuration du port-forward ArgoCD... \033[0m"
-    nohup sudo kubectl port-forward -n argocd svc/argocd-server 8081:80 --address=127.0.0.1 >/dev/null 2>&1 &
+    # Créer l'Ingress pour ArgoCD
+    echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m [*] Configuration d'ArgoCD via Ingress... \033[0m"
+    sudo kubectl apply -f "$SCRIPT_DIR/../conf/ingress.yaml"
+    
     sleep 2
-    echo -e "\033[48;2;0;128;0m\033[38;2;255;255;255m ✓ ArgoCD accessible sur http://localhost:8081 \033[0m"
+    echo -e "\033[48;2;0;128;0m\033[38;2;255;255;255m ✓ Ingress créé \033[0m"
 else
     echo -e "\033[48;2;200;100;0m\033[38;2;255;255;255m ⚠ ArgoCD ne s'est pas lancé correctement - vérifiez avec: sudo kubectl get pods -n argocd \033[0m"
 fi
@@ -124,5 +125,29 @@ bash "$SCRIPT_DIR/k9s_install.sh" && echo -e "\033[48;2;0;128;0m\033[38;2;255;25
 
 echo ""
 echo -e "\033[48;2;0;128;0m\033[38;2;255;255;255m ✓ Installation terminée avec succès ! \033[0m"
-echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m Services accessibles : \033[0m"
-echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m  - ArgoCD: http://localhost:8081 \033[0m"
+echo ""
+echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m ╔════════════════════════════════════════════════════════╗ \033[0m"
+echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m ║  SERVICES ET INFORMATIONS D'ACCÈS                      ║ \033[0m"
+echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m ╠════════════════════════════════════════════════════════╣ \033[0m"
+echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m ║  ArgoCD                                                ║ \033[0m"
+echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m ║    URL:      http://localhost                          ║ \033[0m"
+echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m ║    Utilisateur: admin                                  ║ \033[0m"
+
+ARGOCD_PASSWORD=$(sudo kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" 2>/dev/null | base64 -d 2>/dev/null || echo "N/A")
+printf '\033[48;2;0;100;200m\033[38;2;255;255;255m ║    Mot de passe: %-36s  ║ \033[0m\n' "${ARGOCD_PASSWORD}"
+
+echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m ╠════════════════════════════════════════════════════════╣ \033[0m"
+echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m ║  Kubernetes Cluster                                    ║ \033[0m"
+echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m ║    Cluster:  inception-of-things                       ║ \033[0m"
+echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m ║    Nodes:    1 server + 2 agents                       ║ \033[0m"
+echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m ║    k9s:      k9s (alias: sudo access)                  ║ \033[0m"
+echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m ╠════════════════════════════════════════════════════════╣ \033[0m"
+echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m ║  Commandes utiles                                      ║ \033[0m"
+echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m ║    • Vérifier l'état:    sudo kubectl get pods         ║ \033[0m"
+echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m ║    • TUI k9s:            sudo k9s                      ║ \033[0m"
+echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m ║    • Vérif' Ingress:     sudo kubectl get ing -n argocd║ \033[0m"
+echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m ║    • Guide config:        cat p3/ARGOCD_CONFIG_GUIDE   ║ \033[0m"
+echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m ║    • Guide installation:  cat p3/INSTALL.md            ║ \033[0m"
+echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m ║    • Désinstaller:        bash Scripts/uninstall.sh    ║ \033[0m"
+echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m ╚════════════════════════════════════════════════════════╝ \033[0m"
+echo ""
