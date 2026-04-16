@@ -1,0 +1,30 @@
+# ============================================
+# ArgoCD Minimal Configuration
+# ============================================
+
+server:
+  insecure: true
+  service:
+    type: ClusterIP
+    port: 80
+  extraArgs:
+    - --insecure
+
+controller:
+  replicas: 1
+
+repoServer:
+  replicas: 1
+
+configs:
+  cm:
+    url: http://localhost
+    insecure: true
+  params:
+    server.url: http://localhost
+    server.insecure: "true"
+
+redis:
+  enabled: true
+  auth:
+    enabled: false
