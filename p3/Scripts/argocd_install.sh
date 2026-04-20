@@ -28,8 +28,13 @@ fi
 
 # Installer ArgoCD avec le fichier de configuration
 echo "Installation d'ArgoCD avec configuration personnalisée..."
-sudo helm install argocd argo/argo-cd -n argocd --create-namespace \
+sudo helm upgrade --install argocd argo/argo-cd -n argocd --create-namespace \
+  --wait --timeout 10m \
   -f "$CONF_DIR/argocd-value.yaml"
+
+sudo helm upgrade argocd argo/argo-cd -n argocd -f conf/argocd-value.yaml
+
+sudo kubectl rollout restart statefulset argocd-application-controller -n argocd
 
 # Vérifier l'installation
 echo "Vérification de l'installation..."
