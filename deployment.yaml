@@ -1,53 +1,37 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: demo-app
+  name: playground-app
   namespace: dev
   labels:
-    app: demo-app
+    app: playground-app
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: demo-app
+      app: playground-app
   template:
     metadata:
       labels:
-        app: demo-app
+        app: playground-app
     spec:
       containers:
-        - name: nginx
-          image: nginx:1.27-alpine
+        - name: playground
+          image: wil42/playground:v1
           ports:
-            - containerPort: 80
-          command:
-            - /bin/sh
-            - -c
-            - |
-              cat <<'EOF' >/usr/share/nginx/html/index.html
-              <!doctype html>
-              <html>
-              <head><title>Inception of Things</title></head>
-              <body style="font-family: sans-serif; text-align: center; padding-top: 20vh;">
-                <h1>Deployed by Argo CD</h1>
-                <p>Namespace: dev</p>
-              </body>
-              </html>
-              EOF
-              nginx -g 'daemon off;'
+            - containerPort: 8888
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: demo-app
+  name: playground-app
   namespace: dev
   labels:
-    app: demo-app
+    app: playground-app
 spec:
   selector:
-    app: demo-app
+    app: playground-app
   ports:
-    - port: 80
-      targetPort: 80
+    - port: 8888
+      targetPort: 8888
       protocol: TCP
-
