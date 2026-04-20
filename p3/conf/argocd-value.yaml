@@ -18,10 +18,10 @@ repoServer:
 
 configs:
   cm:
-    url: http://localhost
+    url: http://argocd.localhost
     insecure: true
   params:
-    server.url: http://localhost
+    server.url: http://argocd.localhost
     server.insecure: "true"
 
 redis:

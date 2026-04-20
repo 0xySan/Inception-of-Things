@@ -8,7 +8,6 @@ metadata:
   name: argocd-ingress
   namespace: argocd
 spec:
-  ingressClassName: traefik
   rules:
   - host: argocd.localhost
     http:
@@ -27,7 +26,6 @@ metadata:
   name: demo-app-ingress
   namespace: dev
 spec:
-  ingressClassName: traefik
   rules:
   - host: localhost
     http:
@@ -36,6 +34,6 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: demo-app
+            name: playground-app
             port:
               number: 8888

@@ -27,7 +27,7 @@ sudo k3d cluster delete inception-of-things 2>/dev/null && echo -e "\033[48;2;0;
 bash "$SCRIPT_DIR/k3d_install.sh" && echo -e "\033[48;2;0;128;0m\033[38;2;255;255;255m ✓ k3d installé ! \033[0m"
 
 #On cree un cluster k3d
-sudo k3d cluster create inception-of-things --agents 2 --port "80:80@loadbalancer" --port "443:443@loadbalancer" --port "8080:8080@loadbalancer" && echo -e "\033[48;2;0;128;0m\033[38;2;255;255;255m ✓ Cluster k3d créé ! \033[0m"
+sudo k3d cluster create inception-of-things --agents 2 --port "80:80@loadbalancer" --port "443:443@loadbalancer" --port "8080:8080@loadbalancer" --port "8888:8888@loadbalancer" && echo -e "\033[48;2;0;128;0m\033[38;2;255;255;255m ✓ Cluster k3d créé ! \033[0m"
 
 # Configuration du kubeconfig pour le cluster k3d
 echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m [*] Configuration du kubeconfig... \033[0m"
@@ -155,14 +155,14 @@ echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m ╔════════�
 echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m ║  SERVICES ET INFORMATIONS D'ACCÈS                      ║ \033[0m"
 echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m ╠════════════════════════════════════════════════════════╣ \033[0m"
 echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m ║  ArgoCD                                                ║ \033[0m"
-echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m ║    URL:      http://localhost                          ║ \033[0m"
+echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m ║    URL:      http://argocd.localhost                   ║ \033[0m"
 echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m ║    Utilisateur: admin                                  ║ \033[0m"
 
 ARGOCD_PASSWORD=$(sudo kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" 2>/dev/null | base64 -d 2>/dev/null || echo "N/A")
 printf '\033[48;2;0;100;200m\033[38;2;255;255;255m ║    Mot de passe: %-36s  ║ \033[0m\n' "${ARGOCD_PASSWORD}"
 echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m ╠════════════════════════════════════════════════════════╣ \033[0m"
 echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m ║  Application de démonstration                          ║ \033[0m"
-echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m ║    URL:      http://app.localhost                      ║ \033[0m"
+echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m ║    URL:      http://localhost                          ║ \033[0m"
 echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m ╠════════════════════════════════════════════════════════╣ \033[0m"
 echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m ║  Kubernetes Cluster                                    ║ \033[0m"
 echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m ║    Cluster:  inception-of-things                       ║ \033[0m"
