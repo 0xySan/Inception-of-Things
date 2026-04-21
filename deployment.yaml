@@ -1,26 +1,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: playground-app
+  name: myapp
   namespace: dev
-  labels:
-    app: playground-app
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: playground-app
+      app: myapp
   template:
     metadata:
       labels:
-        app: playground-app
+        app: myapp
     spec:
       containers:
-        - name: playground
-          image: wil42/playground:v2
-          imagePullPolicy: Always
-          ports:
-            - containerPort: 8888
+      - name: myapp
+        image: wil42/playground:v2
+        ports:
+        - containerPort: 8888
 ---
 apiVersion: v1
 kind: Service
@@ -36,10 +33,3 @@ spec:
     - port: 8888
       targetPort: 8888
       protocol: TCP
----
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-spec:
-  syncPolicy:
-    syncOptions:
-      - Prune=false
