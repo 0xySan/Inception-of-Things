@@ -7,11 +7,11 @@
 #  EEEEE    M   M   A   A   I    LLLLL    LLLLL    EEEEE      T
 # ===============================================================
 
-# Téléchargement et installation du tui K9S en mode admin
+# Download and install k9s TUI
 
 curl -sS https://webi.sh/k9s | sh
 source ~/.config/envman/PATH.env
 
-# Copier k9s vers /usr/local/bin pour accès sudo
+# Copy k9s to /usr/local/bin for sudo access
 sudo cp ~/.local/bin/k9s /usr/local/bin/k9s
 sudo chmod +x /usr/local/bin/k9s

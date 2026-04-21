@@ -4,6 +4,9 @@ all:
 clean:
 	./uninstall.sh
 
+info:
+	./info.sh
+
 re: clean all
 
-.PHONY: all clean re
+.PHONY: all clean re info

@@ -7,46 +7,65 @@
 #  EEEEE    M   M   A   A   I    LLLLL    LLLLL    EEEEE      T
 # ===============================================================
 
-#On récupère le chemin absolu du dossier dans lequel se trouve CE script
+# ===============================================================
+# Complete Uninstall: K3D + Tools + Configs
+# ===============================================================
+
+# Get current script directory
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
 
-echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m Désinstallation en cours... \033[0m"
+BG_BLUE="\033[48;2;0;100;200m"
+BG_RED="\033[48;2;200;0;0m"
+BG_YELLOW="\033[48;2;200;160;0m"
+BG_GREEN="\033[48;2;0;128;0m"
+BG_WHITE="\033[48;2;255;255;255m"
+FG_WHITE="\033[38;2;255;255;255m"
+FG_BLACK="\033[38;2;0;0;0m"
+RESET="\033[0m"
+
+info() { echo -e "${BG_BLUE}${FG_WHITE} [INFO] ${RESET} $*"; }
+warn() { echo -e "${BG_YELLOW}${FG_BLACK} [WARN] ${RESET} $*"; }
+error() { echo -e "${BG_RED}${FG_WHITE} [ERROR] ${RESET} $*"; }
+ok() { echo -e "${BG_GREEN}${FG_WHITE} [OK] ${RESET} $*"; }
+note() { echo -e "${BG_WHITE}${FG_BLACK} $*${RESET}"; }
+
+info "Uninstall in progress..."
 
 # ===============================================================
-# K3D - Suppression du cluster et namespaces
+# K3D - Delete Cluster and Namespaces
 # ===============================================================
 
-echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m [1/4] Suppression des namespaces... \033[0m"
-sudo kubectl delete namespace argocd --ignore-not-found && echo -e "\033[48;2;0;128;0m\033[38;2;255;255;255m ✓ Namespace argocd supprimé \033[0m"
-sudo kubectl delete namespace dev --ignore-not-found && echo -e "\033[48;2;0;128;0m\033[38;2;255;255;255m ✓ Namespace dev supprimé \033[0m"
+info "Deleting namespaces..."
+sudo kubectl delete namespace argocd --ignore-not-found && ok "Namespace argocd deleted"
+sudo kubectl delete namespace dev --ignore-not-found && ok "Namespace dev deleted"
 
-echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m [2/4] Suppression du cluster k3d... \033[0m"
-sudo k3d cluster delete inception-of-things && echo -e "\033[48;2;0;128;0m\033[38;2;255;255;255m ✓ Cluster k3d supprimé \033[0m"
-
-# ===============================================================
-# Nettoyage des outils installés
-# ===============================================================
-
-echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m [3/4] Suppression des outils... \033[0m"
-
-# Suppression de k3d
-sudo rm -f /usr/local/bin/k3d && echo -e "\033[48;2;0;128;0m\033[38;2;255;255;255m ✓ k3d supprimé \033[0m"
-
-# Suppression de Helm
-sudo rm -f /usr/local/bin/helm && echo -e "\033[48;2;0;128;0m\033[38;2;255;255;255m ✓ Helm supprimé \033[0m"
-
-# Suppression de k9s
-sudo rm -f ~/.local/bin/k9s && echo -e "\033[48;2;0;128;0m\033[38;2;255;255;255m ✓ k9s supprimé \033[0m"
-
-# Netoyage docker.io des images k3d
-sudo docker rmi -f $(sudo docker images --filter=reference='rancher/k3s*' -q) 2>/dev/null && echo -e "\033[48;2;0;128;0m\033[38;2;255;255;255m ✓ Images k3s de docker.io supprimées \033[0m"
+info "Deleting k3d cluster..."
+sudo k3d cluster delete inception-of-things && ok "k3d cluster deleted"
 
 # ===============================================================
-# Suppression des fichiers de configuration
+# Cleanup Installed Tools
 # ===============================================================
 
-echo -e "\033[48;2;0;100;200m\033[38;2;255;255;255m [4/4] Suppression des fichiers de configuration... \033[0m"
-rm -rf ~/.config/k3d && echo -e "\033[48;2;0;128;0m\033[38;2;255;255;255m ✓ Configuration k3d supprimée \033[0m"
-rm -rf ~/.kube/config ~/.kube/k3d-* ~/.kube/clusters/k3d* 2>/dev/null && echo -e "\033[48;2;0;128;0m\033[38;2;255;255;255m ✓ Kubeconfig supprimé \033[0m"
+info "Removing installed tools..."
 
-echo -e "\033[48;2;0;128;0m\033[38;2;255;255;255m ✓ Désinstallation complète ! \033[0m" 
+# Remove k3d
+sudo rm -f /usr/local/bin/k3d && ok "k3d removed"
+
+# Remove Helm
+sudo rm -f /usr/local/bin/helm && ok "Helm removed"
+
+# Remove k9s
+sudo rm -f ~/.local/bin/k9s && ok "k9s removed"
+
+# Cleanup docker.io k3d images
+sudo docker rmi -f $(sudo docker images --filter=reference='rancher/k3s*' -q) 2>/dev/null && ok "k3s images removed"
+
+# ===============================================================
+# Delete Configuration Files
+# ===============================================================
+
+info "Deleting configuration files..."
+rm -rf ~/.config/k3d && ok "k3d configuration deleted"
+rm -rf ~/.kube/config ~/.kube/k3d-* ~/.kube/clusters/k3d* 2>/dev/null && ok "Kubeconfig deleted"
+
+ok "Complete uninstall finished!"

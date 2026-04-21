@@ -7,5 +7,5 @@
 #  EEEEE    M   M   A   A   I    LLLLL    LLLLL    EEEEE      T
 # ===============================================================
 
-# Téléchargement et installation de helm pour k3d
+# Download and install Helm for k3d
 curl -s https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash

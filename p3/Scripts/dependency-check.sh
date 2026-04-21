@@ -7,32 +7,32 @@
 #  EEEEE    M   M   A   A   I    LLLLL    LLLLL    EEEEE      T
 # ===============================================================
 
-# Liste minimale des paquets pour k3d, Helm, ArgoCD et GitOps via GitHub
+# Minimal package list for k3d, Helm, ArgoCD, and GitOps via GitHub
 APT_PACKAGES=(
-  curl            # Pour télécharger les binaires/scripts (k3d, Helm, ArgoCD, kubectl)
-  ca-certificates # Requis pour que curl valide les connexions HTTPS (GitHub, releases, etc.)
-  docker.io       # Moteur de conteneurs indispensable pour faire tourner le cluster k3d
-  git             # Requis sur votre machine pour cloner, commit et push vers GitHub
-  kubectl         # Outil d'interaction avec k3s
+  curl            # Download binaries/scripts (k3d, Helm, ArgoCD, kubectl)
+  ca-certificates # Required so curl can validate HTTPS connections (GitHub, releases, etc.)
+  docker.io       # Container engine required to run the k3d cluster
+  git             # Required to clone, commit, and push to GitHub
+  kubectl         # CLI tool to interact with k3s
 )
 
 PACMAN_PACKAGES=(
-  curl            # Pour télécharger les binaires/scripts (k3d, Helm, ArgoCD, kubectl)
-  ca-certificates # Requis pour que curl valide les connexions HTTPS (GitHub, releases, etc.)
-  docker          # Moteur de conteneurs indispensable pour faire tourner le cluster k3d
-  git             # Requis sur votre machine pour cloner, commit et push vers GitHub
-  kubectl         # Outil d'interaction avec k3s
+  curl            # Download binaries/scripts (k3d, Helm, ArgoCD, kubectl)
+  ca-certificates # Required so curl can validate HTTPS connections (GitHub, releases, etc.)
+  docker          # Container engine required to run the k3d cluster
+  git             # Required to clone, commit, and push to GitHub
+  kubectl         # CLI tool to interact with k3s
 )
 
 if command -v apt >/dev/null 2>&1; then
-  # Mise à jour et installation de la liste minimale avec apt
+  # Update and install the minimal list with apt
   sudo apt update
   sudo apt install -y "${APT_PACKAGES[@]}"
 elif command -v pacman >/dev/null 2>&1; then
-  # Mise à jour et installation de la liste minimale avec pacman
+  # Update and install the minimal list with pacman
   sudo pacman -Sy --noconfirm --needed "${PACMAN_PACKAGES[@]}"
 else
-  echo "Aucun gestionnaire de paquets pris en charge trouvé (apt ou pacman)."
+  echo "No supported package manager found (apt or pacman)."
   exit 1
 fi
 

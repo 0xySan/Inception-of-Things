@@ -1,7 +1,3 @@
-# ============================================
-# ArgoCD Minimal Configuration
-# ============================================
-
 server:
   insecure: true
   service:
@@ -12,10 +8,6 @@ server:
 
 controller:
   replicas: 1
-  # Add this extra parameter to ensure the controller resyncs more frequently
-  extraArgs:
-    - --app-resync
-    - "30" # Checks for changes every 30 seconds
 
 repoServer:
   replicas: 1
@@ -23,9 +15,8 @@ repoServer:
 configs:
   cm:
     url: http://argocd.localhost
-    # timeout.reconciliation controls how often ArgoCD polls the Git repo
     insecure: true
-    timeout.reconciliation: "15s"
+    timeout.reconciliation: 60s
   params:
     server.url: http://argocd.localhost
     server.insecure: "true"
