@@ -1,23 +1,26 @@
-apiVersion: apps/v1
+apiVersion: v1
 kind: Deployment
 metadata:
-  name: myapp
+  name: playground-app
   namespace: dev
+  labels:
+    app: playground-app
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: myapp
+      app: playground-app
   template:
     metadata:
       labels:
-        app: myapp
+        app: playground-app
     spec:
       containers:
-      - name: myapp
-        image: wil42/playground:v2
-        ports:
-        - containerPort: 8888
+        - name: playground
+          image: wil42/playground:v2
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8888
 ---
 apiVersion: v1
 kind: Service
