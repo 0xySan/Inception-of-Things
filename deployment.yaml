@@ -36,3 +36,10 @@ spec:
     - port: 8888
       targetPort: 8888
       protocol: TCP
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+spec:
+  syncPolicy:
+    syncOptions:
+      - Prune=false
