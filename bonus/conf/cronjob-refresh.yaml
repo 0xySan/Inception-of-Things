@@ -1,0 +1,41 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: argocd-refresh
+  namespace: argocd
+spec:
+  schedule: "*/1 * * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 2
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: argocd-refresh
+        spec:
+          serviceAccountName: argocd-application-controller
+          restartPolicy: OnFailure
+          containers:
+            - name: refresh
+              image: curlimages/curl:8.7.1
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  NOW="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+                  TOKEN="$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)"
+                  CACERT="/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+                  API="https://kubernetes.default.svc/apis/argoproj.io/v1alpha1/namespaces/argocd/applications/dev-app"
+
+                  echo "[$(date '+%Y-%m-%d %H:%M:%S')] Trigger refresh via Kubernetes API"
+
+                  curl -sS --fail --cacert "$CACERT" \
+                    -X PATCH \
+                    -H "Authorization: Bearer $TOKEN" \
+                    -H "Content-Type: application/merge-patch+json" \
+                    "$API" \
+                    -d "{\"metadata\":{\"annotations\":{\"argocd.argoproj.io/refresh\":\"normal\",\"refresh-ts\":\"$NOW\"}}}"
+
+                  echo "[$(date '+%Y-%m-%d %H:%M:%S')] Refresh API call sent"
