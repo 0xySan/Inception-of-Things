@@ -26,7 +26,7 @@ RESET="\033[0m"
 info() { echo -e "${BG_BLUE}${FG_WHITE} [INFO] ${RESET} $*"; }
 warn() { echo -e "${BG_YELLOW}${FG_BLACK} [WARN] ${RESET} $*"; }
 error() { echo -e "${BG_RED}${FG_WHITE} [ERROR] ${RESET} $*"; }
-ok() { echo -e "${BG_GREEN}${FG_WHITE} [OK] ${RESET} $*"; }
+ok() { echo -e "${BG_GREEN}${FG_WHITE} [ OK ] ${RESET} $*"; }
 note() { echo -e "${BG_WHITE}${FG_BLACK} $*${RESET}"; }
 
 info "Uninstall in progress..."
