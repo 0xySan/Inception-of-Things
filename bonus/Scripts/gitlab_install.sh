@@ -8,7 +8,7 @@
 # ===============================================================
 
 # ===============================================================
-# ArgoCD Installation via Helm
+# Lightweight Gitlab Installation via Helm
 # ===============================================================
 
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
@@ -31,8 +31,8 @@ ok() { echo -e "${BG_GREEN}${FG_WHITE} [ OK ] ${RESET} $*"; }
 # Helm Configuration
 # ===============================================================
 
-info "Adding ArgoCD Helm repo..."
-sudo helm repo add argo https://argoproj.github.io/argo-helm || true
+info "Adding Gitlab Helm repo..."
+sudo helm repo add gitlab https://charts.gitlab.io/ || true
 
 info "Updating Helm repositories..."
 sudo helm repo update
@@ -41,37 +41,23 @@ sudo helm repo update
 # Configuration Files Check
 # ===============================================================
 
-if [ ! -f "$CONF_DIR/argocd-value.yaml" ]; then
-  error "ArgoCD configuration file not found"
-    exit 1
+if [ ! -f "$CONF_DIR/gitlab-value.yaml" ]; then
+  error "Gitlab configuration file not found"
+	exit 1
 fi
 
 # ===============================================================
-# ArgoCD Installation
+# Gitlab Installation
 # ===============================================================
 
-info "Installing ArgoCD..."
-sudo helm upgrade --install argocd argo/argo-cd -n argocd --create-namespace \
-  --wait --timeout 10m \
-  -f "$CONF_DIR/argocd-value.yaml"
-
-# ===============================================================
-# Secure ArgoCD Application Deployment
-# ===============================================================
-
-info "Creating ArgoCD Application..."
-sudo kubectl apply -f "$CONF_DIR/argocd-application.yaml"
-
-# ===============================================================
-# Automatic Refresh Agent
-# ===============================================================
-
-info "Deploying refresh agent (every minute)..."
-sudo kubectl apply -f "$CONF_DIR/cronjob-refresh.yaml"
+info "Installing Gitlab..."
+sudo helm upgrade --install gitlab gitlab/gitlab -n gitlab --create-namespace \
+  --wait --timeout 20m \
+  -f "$CONF_DIR/gitlab-value.yaml"
 
 # ===============================================================
 # Final Check
 # ===============================================================
 
-ok "ArgoCD deployment is in progress..."
-sudo helm list -n argocd
+ok "Gitlab deployment is in progress..."
+sudo helm list -n gitlab

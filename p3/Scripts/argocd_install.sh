@@ -24,20 +24,18 @@ FG_BLACK="\033[38;2;0;0;0m"
 RESET="\033[0m"
 
 info() { echo -e "${BG_BLUE}${FG_WHITE} [INFO] ${RESET} $*"; }
-warn() { echo -e "${BG_YELLOW}${FG_BLACK} [WARN] ${RESET} $*"; }
-error() { echo -e "${BG_RED}${FG_WHITE} [ERROR] ${RESET} $*"; }
-ok() { echo -e "${BG_GREEN}${FG_WHITE} [OK] ${RESET} $*"; }
-note() { echo -e "${BG_WHITE}${FG_BLACK} $*${RESET}"; }
+error() { echo -e "${BG_RED}${FG_WHITE} [FAIL] ${RESET} $*"; }
+ok() { echo -e "${BG_GREEN}${FG_WHITE} [ OK ] ${RESET} $*"; }
 
 # ===============================================================
 # Helm Configuration
 # ===============================================================
 
 info "Adding ArgoCD Helm repo..."
-sudo helm repo add argo https://argoproj.github.io/argo-helm 2>/dev/null || true
+sudo helm repo add argo https://argoproj.github.io/argo-helm || true
 
 info "Updating Helm repositories..."
-sudo helm repo update &>/dev/null
+sudo helm repo update
 
 # ===============================================================
 # Configuration Files Check
@@ -63,9 +61,6 @@ sudo helm upgrade --install argocd argo/argo-cd -n argocd --create-namespace \
 
 info "Creating ArgoCD Application..."
 sudo kubectl apply -f "$CONF_DIR/argocd-application.yaml"
-
-info "Configuring Ingress..."
-sudo kubectl apply -f "$CONF_DIR/ingress.yaml"
 
 # ===============================================================
 # Automatic Refresh Agent

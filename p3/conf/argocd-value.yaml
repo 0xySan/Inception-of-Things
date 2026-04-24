@@ -1,3 +1,7 @@
+## Docs:
+## - Argo CD Helm chart: https://github.com/argoproj/argo-helm/tree/main/charts/argo-cd
+## - Argo CD configuration: https://argo-cd.readthedocs.io/en/stable/operator-manual/argocd-cm-yaml/
+
 server:
   insecure: true
   service:

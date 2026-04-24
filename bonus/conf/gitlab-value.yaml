@@ -1,0 +1,73 @@
+## Docs:
+## - GitLab Helm chart deployment: https://docs.gitlab.com/charts/installation/deployment/
+## - GitLab global values: https://docs.gitlab.com/charts/charts/globals/
+## - GitLab chart options: https://docs.gitlab.com/charts/installation/command-line-options/
+
+global:
+  edition: ce
+  hosts:
+    domain: localhost
+    https: false
+    gitlab:
+      name: gitlab.localhost
+      https: false
+    ssh: gitlab.localhost
+  ingress:
+    enabled: false
+    class: traefik
+    configureCertmanager: false
+    tls:
+      enabled: false
+  minio:
+    enabled: false
+  pages:
+    enabled: false
+  registry:
+    enabled: false
+  appConfig:
+    enableUsagePing: false
+    enableSeatLink: false
+    enableImpersonation: false
+    defaultProjectsFeatures:
+      builds: true
+      containerRegistry: false
+      issues: true
+      mergeRequests: true
+      snippets: true
+      wiki: true
+    artifacts:
+      enabled: false
+    lfs:
+      enabled: false
+    uploads:
+      enabled: false
+    packages:
+      enabled: false
+    externalDiffs:
+      enabled: false
+    object_store:
+      enabled: false
+
+gitlab:
+  toolbox:
+    backups:
+      objectStorage:
+        config:
+          secret: gitlab-toolbox-backup-object-storage
+          key: connection
+      cron:
+        enabled: false
+
+nginx-ingress:
+  enabled: false
+
+prometheus:
+  install: false
+
+gitlab-runner:
+  install: false
+
+registry:
+  enabled: false
+
+installCertmanager: false

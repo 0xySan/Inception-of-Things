@@ -1,3 +1,6 @@
+## Docs:
+## - Argo CD Application spec: https://argo-cd.readthedocs.io/en/stable/user-guide/application-specification/
+
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:

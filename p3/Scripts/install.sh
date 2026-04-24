@@ -24,9 +24,7 @@ RESET="\033[0m"
 
 info() { echo -e "${BG_BLUE}${FG_WHITE} [INFO] ${RESET} $*"; }
 warn() { echo -e "${BG_YELLOW}${FG_BLACK} [WARN] ${RESET} $*"; }
-error() { echo -e "${BG_RED}${FG_WHITE} [ERROR] ${RESET} $*"; }
-ok() { echo -e "${BG_GREEN}${FG_WHITE} [OK] ${RESET} $*"; }
-note() { echo -e "${BG_WHITE}${FG_BLACK} $*${RESET}"; }
+ok() { echo -e "${BG_GREEN}${FG_WHITE} [ OK ] ${RESET} $*"; }
 
 # Request sudo privileges upfront
 sudo echo ""
@@ -72,6 +70,7 @@ ok "Kubeconfig configured"
 info "Creating namespaces..."
 sudo kubectl create namespace argocd 2>/dev/null || true
 sudo kubectl create namespace dev 2>/dev/null || true
+sudo kubectl create namespace gitlab 2>/dev/null || true
 ok "Namespaces ready"
 
 # ===============================================================
@@ -96,28 +95,6 @@ bash "$SCRIPT_DIR/helm_install.sh" > /dev/null 2>&1 && echo "  ✓ Helm installe
 info "Installing ArgoCD..."
 bash "$SCRIPT_DIR/argocd_install.sh" && echo "  ✓ ArgoCD deployed"
 
-# ===============================================================
-# ArgoCD - Wait
-# ===============================================================
-
-info "Checking ArgoCD deployment..."
-
-# ArgoCD Server
-counter=0
-until sudo kubectl get pods -n argocd -l app.kubernetes.io/name=argocd-server --no-headers 2>/dev/null | grep -q Running || [ $counter -gt 120 ]; do
-    ((counter++))
-    [ $((counter % 10)) -eq 0 ] && warn "Attempt $counter/120..."
-    sleep 1
-done
-
-# ArgoCD Repo Server
-counter=0
-until sudo kubectl get pods -n argocd -l app.kubernetes.io/name=argocd-repo-server --no-headers 2>/dev/null | grep -q Running || [ $counter -gt 120 ]; do
-    ((counter++))
-    [ $((counter % 10)) -eq 0 ] && warn "Attempt $counter/120..."
-    sleep 1
-done
-
 ok "ArgoCD online"
 
 # ===============================================================
@@ -126,6 +103,13 @@ ok "ArgoCD online"
 
 info "Installing k9s (TUI)..."
 bash "$SCRIPT_DIR/k9s_install.sh" > /dev/null 2>&1 && echo "  ✓ k9s installed"
+
+# ===============================================================
+# Ingress - Configuring
+# ===============================================================
+
+info "Configuring Ingress..."
+sudo kubectl apply -f "$SCRIPT_DIR/../conf/ingress.yaml"
 
 # ===============================================================
 # Final Summary

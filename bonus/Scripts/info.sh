@@ -17,6 +17,7 @@ RESET="\033[0m"
 
 note() { echo -e "${BG_WHITE}${FG_BLACK} $*${RESET}"; }
 ARGOCD_PASSWORD=$(sudo kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" 2>/dev/null | base64 -d 2>/dev/null || echo "To retrieve")
+GITLAB_PASSWORD=$(sudo kubectl -n gitlab get secret gitlab-gitlab-initial-root-password -o jsonpath="{.data.password}" 2>/dev/null | base64 -d 2>/dev/null || echo "To retrieve")
 echo ""
 note "╔════════════════════════════════════════════════════════════╗ "
 note "║          ✅ Installation Successful!                       ║ "
@@ -24,11 +25,14 @@ note "╠═══════════════════════�
 note "║  📊 SERVICES                                               ║ "
 note "║  ├─ ArgoCD:        http://argocd.localhost                 ║ "
 note "║  ├─ Application:   http://localhost                        ║ "
+note "║  ├─ GitLab:        http://gitlab.localhost                 ║ "
 note "║  └─ K3D Cluster:   inception-of-things (3 nodes)           ║ "
 note "║                                                            ║ "
 note "║  🔑 AUTHENTICATION                                         ║ "
 note "║  ├─ Username:      admin                                   ║ "
 note "║  └─ Password:      ${ARGOCD_PASSWORD}                        ║ "
+note "║  ├─ GitLab user:   root                                    ║ "
+note "║  └─ GitLab pass:   ${GITLAB_PASSWORD}                       ║ "
 note "║                                                            ║ "
 note "║  🛠️  USEFUL COMMANDS                                        ║ "
 note "║  ├─ kubectl:       sudo kubectl get pods -A                ║ "
