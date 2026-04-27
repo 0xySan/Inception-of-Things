@@ -7,6 +7,8 @@
 #  EEEEE    M   M   A   A   I    LLLLL    LLLLL    EEEEE      T
 # ===============================================================
 
+set -euo pipefail
+
 # ===============================================================
 # Lightweight Gitlab Installation via Helm
 # ===============================================================
@@ -54,11 +56,10 @@ info "Installing Gitlab..."
 sudo helm upgrade --install gitlab gitlab/gitlab \
   -n gitlab \
   -f "$CONF_DIR/gitlab-value.yaml" \
-  --wait --timeout 1200s
-
+  --wait --timeout 30m || error "Gitlab installation failed"
 # ===============================================================
 # Final Check
 # ===============================================================
 
-ok "Gitlab deployment is in progress..."
+ok "Gitlab deployment completed successfully"
 sudo helm list -n gitlab

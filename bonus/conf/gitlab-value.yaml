@@ -15,7 +15,7 @@ global:
   hosts:
     domain: gitlab.localhost 
     externalIP: 0.0.0.0
-    https: false
+    https: false #Not in default confog
   # Disable Rails bootsnap cache (temporary)
   rails:
     bootsnap:

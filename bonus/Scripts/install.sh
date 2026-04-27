@@ -1,4 +1,5 @@
 #!/bin/bash
+
 # ===============================================================
 #  EEEEE    M   M     A     I    L        L        EEEEE    TTTTT
 #  E        MM MM    A A    I    L        L        E          T
@@ -6,6 +7,8 @@
 #  E        M   M   A   A   I    L        L        E          T
 #  EEEEE    M   M   A   A   I    LLLLL    LLLLL    EEEEE      T
 # ===============================================================
+
+set -euo pipefail
 
 # ===============================================================
 # Complete Installation: K3D + ArgoCD + GitOps
@@ -33,11 +36,11 @@ sudo echo ""
 # K3D Cluster - Creation
 # ===============================================================
 
-info "Cleaning existing resources..."
-sudo k3d cluster delete inception-of-things 2>/dev/null && ok "Previous cluster deleted"
-
 info "Installing k3d..."
 bash "$SCRIPT_DIR/k3d_install.sh" > /dev/null 2>&1 && echo "  ✓ k3d ready"
+
+info "Cleaning existing resources..."
+sudo k3d cluster delete inception-of-things 2>/dev/null && ok "Previous cluster deleted"
 
 info "Creating K3D cluster..."
 sudo k3d cluster create inception-of-things --agents 2 \
@@ -87,29 +90,33 @@ done
 ok "All nodes are ready"
 
 # ===============================================================
+# Ingress - Configuring
+# ===============================================================
+
+info "Configuring Ingress..."
+sudo kubectl apply -f "$SCRIPT_DIR/../conf/ingress.yaml"
+ok "Ingress configured"
+
+# ===============================================================
 # Helm - Installation and Configuration
 # ===============================================================
 
 info "Installing Helm..."
 bash "$SCRIPT_DIR/helm_install.sh" > /dev/null 2>&1 && echo "  ✓ Helm installed"
 
+info "Installing Gitlab..."
+bash "$SCRIPT_DIR/gitlab_install.sh" && echo "  ✓ Gitlab deployed"
+
 info "Installing ArgoCD..."
 bash "$SCRIPT_DIR/argocd_install.sh" && echo "  ✓ ArgoCD deployed"
 
 # ===============================================================
-# Gitlab - Installation
+# Gitlab - GitOps Setup
 # ===============================================================
 
-info "Installing Gitlab..."
-bash "$SCRIPT_DIR/gitlab_install.sh" && echo "  ✓ Gitlab deployed"
+info "Setting up Gitlab for GitOps..."
+bash "$SCRIPT_DIR/gitlab_gitops_setup.sh" && echo "  ✓ Gitlab configured for GitOps"
 
-# ===============================================================
-# ArgoCD - Wait
-# ===============================================================
-
-info "Checking ArgoCD deployment..."
-
-ok "ArgoCD online"
 
 # ===============================================================
 # Utilities - Installation
@@ -118,13 +125,6 @@ ok "ArgoCD online"
 info "Installing k9s (TUI)..."
 bash "$SCRIPT_DIR/k9s_install.sh" > /dev/null 2>&1 && echo "  ✓ k9s installed"
 
-
-# ===============================================================
-# Ingress - Configuring
-# ===============================================================
-
-info "Configuring Ingress..."
-sudo kubectl apply -f "$SCRIPT_DIR/../conf/ingress.yaml"
 
 # ===============================================================
 # Final Summary

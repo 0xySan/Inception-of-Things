@@ -9,7 +9,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/0xysan/Inception-of-Things.git
+    repoURL: http://gitlab-webservice-default.gitlab.svc.cluster.local:8181/root/gitops_argocd.git
     targetRevision: app
     path: .
   destination:
@@ -21,3 +21,4 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+      

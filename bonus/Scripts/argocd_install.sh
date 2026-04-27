@@ -7,6 +7,8 @@
 #  EEEEE    M   M   A   A   I    LLLLL    LLLLL    EEEEE      T
 # ===============================================================
 
+set -euo pipefail
+
 # ===============================================================
 # ArgoCD Installation via Helm
 # ===============================================================
@@ -54,13 +56,6 @@ info "Installing ArgoCD..."
 sudo helm upgrade --install argocd argo/argo-cd -n argocd --create-namespace \
   --wait --timeout 10m \
   -f "$CONF_DIR/argocd-value.yaml"
-
-# ===============================================================
-# Secure ArgoCD Application Deployment
-# ===============================================================
-
-info "Creating ArgoCD Application..."
-sudo kubectl apply -f "$CONF_DIR/argocd-application.yaml"
 
 # ===============================================================
 # Automatic Refresh Agent
