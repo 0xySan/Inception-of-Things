@@ -1,73 +1,56 @@
-## Docs:
-## - GitLab Helm chart deployment: https://docs.gitlab.com/charts/installation/deployment/
-## - GitLab global values: https://docs.gitlab.com/charts/charts/globals/
-## - GitLab chart options: https://docs.gitlab.com/charts/installation/command-line-options/
+#Source : https://gitlab.com/gitlab-org/charts/gitlab/-/blob/master/examples/values-minikube-minimum.yaml?ref_type=heads
 
+# values-minikube.yaml
+# This example intended as baseline to use Minikube for the deployment of GitLab
+# - Minimized CPU/Memory load, can fit into 3 CPU, 6 GB of RAM (barely)
+# - Services that are not compatible with how Minikube runs are disabled
+# - Some services entirely removed, or scaled down to 1 replica.
+# - Configured to use 192.168.99.100, and nip.io for the domain
+
+# Minimal settings
 global:
-  edition: ce
-  hosts:
-    domain: localhost
-    https: false
-    gitlab:
-      name: gitlab.localhost
-      https: false
-    ssh: gitlab.localhost
   ingress:
-    enabled: false
-    class: traefik
     configureCertmanager: false
-    tls:
+    class: "nginx"
+  hosts:
+    domain: gitlab.localhost 
+    externalIP: 0.0.0.0
+    https: false
+  # Disable Rails bootsnap cache (temporary)
+  rails:
+    bootsnap:
       enabled: false
-  minio:
-    enabled: false
-  pages:
-    enabled: false
-  registry:
-    enabled: false
-  appConfig:
-    enableUsagePing: false
-    enableSeatLink: false
-    enableImpersonation: false
-    defaultProjectsFeatures:
-      builds: true
-      containerRegistry: false
-      issues: true
-      mergeRequests: true
-      snippets: true
-      wiki: true
-    artifacts:
-      enabled: false
-    lfs:
-      enabled: false
-    uploads:
-      enabled: false
-    packages:
-      enabled: false
-    externalDiffs:
-      enabled: false
-    object_store:
-      enabled: false
-
-gitlab:
-  toolbox:
-    backups:
-      objectStorage:
-        config:
-          secret: gitlab-toolbox-backup-object-storage
-          key: connection
-      cron:
-        enabled: false
-
+  shell:
+    # Configure the clone link in the UI to include the high-numbered NodePort
+    # value from below (`gitlab.gitlab-shell.service.nodePort`)
+    port: 32022
+# Don't use certmanager, we'll self-sign
+installCertmanager: false
+# Use the `ingress` addon, not our Ingress (can't map 22/80/443)
 nginx-ingress:
   enabled: false
-
+# Save resources, only 3 CPU
 prometheus:
   install: false
-
 gitlab-runner:
   install: false
-
+# Reduce replica counts, reducing CPU & memory requirements
+gitlab:
+  webservice:
+    minReplicas: 1
+    maxReplicas: 1
+  sidekiq:
+    minReplicas: 1
+    maxReplicas: 1
+  gitlab-shell:
+    minReplicas: 1
+    maxReplicas: 1
+    # Map gitlab-shell to a high-numbered NodePort to support cloning over SSH since
+    # Minikube takes port 22.
+    service:
+      type: NodePort
+      nodePort: 32022
 registry:
-  enabled: false
-
-installCertmanager: false
+  hpa:
+    minReplicas: 1
+    maxReplicas: 1

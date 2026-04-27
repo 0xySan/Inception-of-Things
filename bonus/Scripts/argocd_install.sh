@@ -52,7 +52,7 @@ fi
 
 info "Installing ArgoCD..."
 sudo helm upgrade --install argocd argo/argo-cd -n argocd --create-namespace \
-  --wait --timeout 10m --debug \
+  --wait --timeout 10m \
   -f "$CONF_DIR/argocd-value.yaml"
 
 # ===============================================================

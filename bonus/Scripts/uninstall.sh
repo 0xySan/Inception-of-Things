@@ -38,6 +38,10 @@ info "Uninstall in progress..."
 info "Deleting namespaces..."
 sudo kubectl delete namespace argocd --ignore-not-found && ok "Namespace argocd deleted"
 sudo kubectl delete namespace dev --ignore-not-found && ok "Namespace dev deleted"
+sudo kubectl delete namespace gitlab --ignore-not-found && ok "Namespace gitlab deleted"
+
+info "Removing GitLab Helm release..."
+sudo helm uninstall gitlab -n gitlab 2>/dev/null && ok "GitLab release removed" || warn "GitLab release not found"
 
 info "Deleting k3d cluster..."
 sudo k3d cluster delete inception-of-things && ok "k3d cluster deleted"
@@ -52,6 +56,7 @@ info "Removing installed tools..."
 sudo rm -f /usr/local/bin/k3d && ok "k3d removed"
 
 # Remove Helm
+sudo helm repo remove gitlab 2>/dev/null && ok "GitLab Helm repo removed" || warn "GitLab Helm repo not found"
 sudo rm -f /usr/local/bin/helm && ok "Helm removed"
 
 # Remove k9s

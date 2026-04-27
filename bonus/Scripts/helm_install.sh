@@ -8,4 +8,4 @@
 # ===============================================================
 
 # Download and install Helm for k3d
-curl -s https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+curl -s https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-4 | bash

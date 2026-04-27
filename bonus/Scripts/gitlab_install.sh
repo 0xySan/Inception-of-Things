@@ -51,9 +51,10 @@ fi
 # ===============================================================
 
 info "Installing Gitlab..."
-sudo helm upgrade --install gitlab gitlab/gitlab -n gitlab --create-namespace \
-  --wait --timeout 30m --debug \
-  -f "$CONF_DIR/gitlab-value.yaml"
+sudo helm upgrade --install gitlab gitlab/gitlab \
+  -n gitlab \
+  -f "$CONF_DIR/gitlab-value.yaml" \
+  --wait --timeout 1200s
 
 # ===============================================================
 # Final Check
