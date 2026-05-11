@@ -1,4 +1,5 @@
 #!/bin/bash
+
 # ===============================================================
 #  EEEEE    M   M     A     I    L        L        EEEEE    TTTTT
 #  E        MM MM    A A    I    L        L        E          T
@@ -6,6 +7,8 @@
 #  E        M   M   A   A   I    L        L        E          T
 #  EEEEE    M   M   A   A   I    LLLLL    LLLLL    EEEEE      T
 # ===============================================================
+
+set -euo pipefail
 
 # ===============================================================
 # Complete Installation: K3D + ArgoCD + GitOps
@@ -86,6 +89,14 @@ done
 ok "All nodes are ready"
 
 # ===============================================================
+# Ingress - Configuring
+# ===============================================================
+
+info "Configuring Ingress..."
+sudo kubectl apply -f "$SCRIPT_DIR/../conf/ingress.yaml"
+ok "Ingress configured"
+
+# ===============================================================
 # Helm - Installation and Configuration
 # ===============================================================
 
@@ -95,7 +106,13 @@ bash "$SCRIPT_DIR/helm_install.sh" > /dev/null 2>&1 && echo "  ✓ Helm installe
 info "Installing ArgoCD..."
 bash "$SCRIPT_DIR/argocd_install.sh" && echo "  ✓ ArgoCD deployed"
 
-ok "ArgoCD online"
+# ===============================================================
+# Gitlab - GitOps Setup
+# ===============================================================
+
+info "Setting up Gitlab for GitOps..."
+bash "$SCRIPT_DIR/gitlab_gitops_setup.sh" && echo "  ✓ Gitlab configured for GitOps"
+
 
 # ===============================================================
 # Utilities - Installation
@@ -104,12 +121,6 @@ ok "ArgoCD online"
 info "Installing k9s (TUI)..."
 bash "$SCRIPT_DIR/k9s_install.sh" > /dev/null 2>&1 && echo "  ✓ k9s installed"
 
-# ===============================================================
-# Ingress - Configuring
-# ===============================================================
-
-info "Configuring Ingress..."
-sudo kubectl apply -f "$SCRIPT_DIR/../conf/ingress.yaml"
 
 # ===============================================================
 # Final Summary

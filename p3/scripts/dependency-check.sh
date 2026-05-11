@@ -7,6 +7,8 @@
 #  EEEEE    M   M   A   A   I    LLLLL    LLLLL    EEEEE      T
 # ===============================================================
 
+set -euo pipefail
+
 # Minimal package list for k3d, Helm, ArgoCD, and GitOps via GitHub
 APT_PACKAGES=(
   curl            # Download binaries/scripts (k3d, Helm, ArgoCD, kubectl)
