@@ -103,7 +103,7 @@ EOF
 # ===============================================================
 
 info "Deploying application via GitOps with ArgoCD..."
-sudo kubectl apply -f "${SCRIPT_DIR}/../conf/argocd-application.yaml" -n argocd || { error "Failed to apply ArgoCD application manifest"; exit 1; }
+sudo kubectl apply -f "${SCRIPT_DIR}/../confs/argocd-application.yaml" -n argocd || { error "Failed to apply ArgoCD application manifest"; exit 1; }
 
 info "Forcing ArgoCD to refresh the application..."
 sudo kubectl annotate application dev-app -n argocd argocd.argoproj.io/refresh=hard --overwrite || {
