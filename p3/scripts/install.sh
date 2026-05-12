@@ -93,7 +93,7 @@ ok "All nodes are ready"
 # ===============================================================
 
 info "Configuring Ingress..."
-sudo kubectl apply -f "$SCRIPT_DIR/../conf/ingress.yaml"
+sudo kubectl apply -f "$SCRIPT_DIR/../confs/ingress.yaml"
 ok "Ingress configured"
 
 # ===============================================================
