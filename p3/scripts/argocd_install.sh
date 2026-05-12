@@ -14,7 +14,7 @@ set -euo pipefail
 # ===============================================================
 
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
-CONF_DIR="$SCRIPT_DIR/../conf"
+CONF_DIR="$SCRIPT_DIR/../confs"
 
 BG_BLUE="\033[48;2;0;100;200m"
 BG_RED="\033[48;2;200;0;0m"
