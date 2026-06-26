@@ -12,6 +12,7 @@ Conformément à l'historique des commits du dépôt (`git log`), la répartitio
 
 *   **Partie 1 & Partie 2 — K3s & Vagrant (VMs & Ingress) :**
     *   `artgirar` (Aka `Arthur Girard - Omen` / `ungarsrandom` dans les commits) : Création et configuration des environnements virtualisés avec Vagrant (Vagrantfile), optimisation des ressources (CPU/RAM pour Debian), gestion des dossiers partagés (rsync) et configuration du raccourci/alias `k` pour kubectl.
+    *   `etaquet` (Aka `0xySan` dans les commits) : Déploiement des trois applications web, mise en place des services K8s et configuration du routage de l'Ingress Nginx pour la Partie 2.
 *   **Partie 3 & Bonus — K3d, Argo CD, GitLab & GitOps :**
     *   `emaillet` (Aka `Lolelsay` / `Emilien` dans les commits) : Développement de la logique d'automatisation et d'installation (scripts `install.sh`, `gitlab_install.sh`, `gitlab_gitops_setup.sh`, `argocd_install.sh`), écriture de l'agent de rafraîchissement d'Argo CD (`cronjob-refresh.yaml`), déploiement des charts Helm et script de diagnostic final (`info.sh`).
     *   `etaquet` (Aka `0xySan` dans les commits) : Configuration initiale d'Argo CD, mise en place du GitOps (manifestes d'application et règles d'ingress), phase intensive de debugging, tests d'intégration, ajustement des redirections de ports (ArgoCD/applications), et corrections de chemins/dossiers (migration de `conf` vers `confs`).
