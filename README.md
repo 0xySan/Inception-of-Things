@@ -1,8 +1,20 @@
 # 🚀 Inception of Things (IoT) — Guide de Soutenance & Cheat-Sheet
 
-Ce dépôt contient mon travail sur le projet **Inception of Things**, un projet de la branche administration système de l'école 42. C'est une introduction complète et pratique à l'orchestration de conteneurs avec **Kubernetes (K8s)**, à l'infrastructure virtuelle avec **Vagrant** et **Docker**, et au déploiement continu via **GitOps (Argo CD, GitLab)**.
+Ce dépôt contient notre travail de groupe sur le projet **Inception of Things**, un projet de la branche administration système de l'école 42. C'est une introduction complète et pratique à l'orchestration de conteneurs avec **Kubernetes (K8s)**, à l'infrastructure virtuelle avec **Vagrant** et **Docker**, et au déploiement continu via **GitOps (Argo CD, GitLab)**.
 
 Ce document est rédigé comme une **prise de notes structurée** et un **guide de survie pour la soutenance (peer evaluation)**. Il met l'accent sur la compréhension des termes techniques, le rôle de chaque composant et fournit la liste exacte des commandes pour prouver le bon fonctionnement de chaque partie.
+
+---
+
+## 👥 Collaboration & Répartition des Tâches
+
+Conformément à l'historique des commits du dépôt (`git log`), la répartition réelle des tâches s'est organisée ainsi :
+
+*   **Partie 1 & Partie 2 — K3s & Vagrant (VMs & Ingress) :**
+    *   `artgirar` (Aka `Arthur Girard - Omen` / `ungarsrandom` dans les commits) : Création et configuration des environnements virtualisés avec Vagrant (Vagrantfile), optimisation des ressources (CPU/RAM pour Debian), gestion des dossiers partagés (rsync) et configuration du raccourci/alias `k` pour kubectl.
+*   **Partie 3 & Bonus — K3d, Argo CD, GitLab & GitOps :**
+    *   `emaillet` (Aka `Lolelsay` / `Emilien` dans les commits) : Développement de la logique d'automatisation et d'installation (scripts `install.sh`, `gitlab_install.sh`, `gitlab_gitops_setup.sh`, `argocd_install.sh`), écriture de l'agent de rafraîchissement d'Argo CD (`cronjob-refresh.yaml`), déploiement des charts Helm et script de diagnostic final (`info.sh`).
+    *   `etaquet` (Aka `0xySan` dans les commits) : Configuration initiale d'Argo CD, mise en place du GitOps (manifestes d'application et règles d'ingress), phase intensive de debugging, tests d'intégration, ajustement des redirections de ports (ArgoCD/applications), et corrections de chemins/dossiers (migration de `conf` vers `confs`).
 
 ---
 
