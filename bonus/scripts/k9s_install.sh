@@ -7,5 +7,11 @@
 #  EEEEE    M   M   A   A   I    LLLLL    LLLLL    EEEEE      T
 # ===============================================================
 
-# Téléchargement et installation de helm pour k3d
-curl -s https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+# Download and install k9s TUI
+
+curl -sS https://webi.sh/k9s | sh
+source ~/.config/envman/PATH.env
+
+# Copy k9s to /usr/local/bin for sudo access
+sudo cp ~/.local/bin/k9s /usr/local/bin/k9s
+sudo chmod +x /usr/local/bin/k9s

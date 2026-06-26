@@ -1,0 +1,31 @@
+## Docs:
+## - Argo CD Helm chart: https://github.com/argoproj/argo-helm/tree/main/charts/argo-cd
+## - Argo CD configuration: https://argo-cd.readthedocs.io/en/stable/operator-manual/argocd-cm-yaml/
+
+server:
+  insecure: true
+  service:
+    type: ClusterIP
+    port: 80
+  extraArgs:
+    - --insecure
+
+controller:
+  replicas: 1
+
+repoServer:
+  replicas: 1
+
+configs:
+  cm:
+    url: http://argocd.localhost
+    insecure: true
+    timeout.reconciliation: 60s
+  params:
+    server.url: http://argocd.localhost
+    server.insecure: "true"
+
+redis:
+  enabled: true
+  auth:
+    enabled: false

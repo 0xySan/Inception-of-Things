@@ -7,5 +7,5 @@
 #  EEEEE    M   M   A   A   I    LLLLL    LLLLL    EEEEE      T
 # ===============================================================
 
-# Téléchargement et installation de k3d
+# Download and install k3d
 curl -s https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | bash

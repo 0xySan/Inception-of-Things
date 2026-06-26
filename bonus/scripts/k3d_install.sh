@@ -7,11 +7,5 @@
 #  EEEEE    M   M   A   A   I    LLLLL    LLLLL    EEEEE      T
 # ===============================================================
 
-# Téléchargement et installation du tui K9S en mode admin
-
-curl -sS https://webi.sh/k9s | sh
-source ~/.config/envman/PATH.env
-
-# Copier k9s vers /usr/local/bin pour accès sudo
-sudo cp ~/.local/bin/k9s /usr/local/bin/k9s
-sudo chmod +x /usr/local/bin/k9s
+# Download and install k3d
+curl -s https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | bash

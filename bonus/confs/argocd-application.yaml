@@ -1,0 +1,24 @@
+## Docs:
+## - Argo CD Application spec: https://argo-cd.readthedocs.io/en/stable/user-guide/application-specification/
+
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: dev-app
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: http://gitlab-webservice-default.gitlab.svc.cluster.local:8181/root/gitops_argocd.git
+    targetRevision: app
+    path: .
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: dev
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      
