@@ -56,6 +56,7 @@ info "Installing Gitlab..."
 sudo helm upgrade --install gitlab gitlab/gitlab \
   -n gitlab \
   -f "$CONF_DIR/gitlab-value.yaml" \
+  --version "9.11.12" \
   --wait --timeout 30m || error "Gitlab installation failed"
 # ===============================================================
 # Final Check
