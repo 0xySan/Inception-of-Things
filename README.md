@@ -3,7 +3,7 @@
 Projet d'introduction a Kubernetes avec K3s, K3d, Vagrant, Helm et Argo CD.
 
 L'ensemble du projet **doit etre execute dans une machine virtuelle**. Le
-dossier `/iot` est le dossier racine du projet dans cette VM.
+dossier `<project_dir>` est le dossier racine du projet dans cette VM.
 
 ## Sommaire
 
@@ -17,7 +17,7 @@ dossier `/iot` est le dossier racine du projet dans cette VM.
 
 ## Prerequis
 
-Les commandes suivantes sont a executer dans la VM, depuis `/iot`.
+Les commandes suivantes sont a executer dans la VM, depuis `<project_dir>`.
 
 ### Debian 13
 
@@ -46,7 +46,7 @@ vagrant plugin install vagrant-libvirt
 Pour K3d, Docker, kubectl, Helm et les outils associes :
 
 ```bash
-cd /iot/p3/scripts
+cd <project_dir>/p3/scripts
 ./dependency-check.sh
 newgrp docker
 ```
@@ -57,7 +57,7 @@ Le script `dependency-check.sh` reconnait Debian avec `apt` et Arch Linux avec
 ## Structure
 
 ```text
-/iot
+<project_dir>
 ├── p1/
 │   ├── Vagrantfile
 │   ├── Makefile
@@ -93,7 +93,7 @@ executer kubectl via K3s.
 Lancer la partie :
 
 ```bash
-cd /iot/p1
+cd <project_dir>/p1
 make up
 vagrant status
 vagrant ssh <login>S
@@ -111,7 +111,7 @@ Deux noeuds doivent etre en etat `Ready`.
 Nettoyer :
 
 ```bash
-cd /iot/p1
+cd <project_dir>/p1
 make clean
 ```
 
@@ -132,7 +132,7 @@ Les applications sont accessibles selon le header `Host` :
 Lancer la partie :
 
 ```bash
-cd /iot/p2
+cd <project_dir>/p2
 make
 vagrant status
 vagrant ssh <login>S
@@ -158,7 +158,7 @@ curl -H 'Host: inconnu.com' http://192.168.56.110
 Nettoyer :
 
 ```bash
-cd /iot/p2
+cd <project_dir>/p2
 make clean
 ```
 
@@ -196,7 +196,7 @@ p3/confs/argocd-application.yaml
 ### Installation
 
 ```bash
-cd /iot/p3/scripts
+cd <project_dir>/p3/scripts
 make
 ```
 
@@ -259,7 +259,7 @@ minutes.
 Nettoyer :
 
 ```bash
-cd /iot/p3/scripts
+cd <project_dir>/p3/scripts
 make clean
 ```
 
@@ -274,7 +274,7 @@ puis configure Argo CD pour utiliser ce depot comme source GitOps.
 Lancer le bonus apres validation de la partie 3 :
 
 ```bash
-cd /iot/bonus/scripts
+cd <project_dir>/bonus/scripts
 make
 ```
 
@@ -311,7 +311,7 @@ http://gitlab-webservice-default.gitlab.svc.cluster.local:8181/root/gitops_argoc
 Nettoyer :
 
 ```bash
-cd /iot/bonus/scripts
+cd <project_dir>/bonus/scripts
 make clean
 ```
 
@@ -360,7 +360,7 @@ sudo k9s
 Introduction project to Kubernetes with K3s, K3d, Vagrant, Helm and Argo CD.
 
 The whole project **must run inside a virtual machine**. The project root in
-that VM is `/iot`.
+that VM uses `<project_dir>` as its project directory.
 
 ## Requirements
 
@@ -393,7 +393,7 @@ vagrant plugin install vagrant-libvirt
 Install the tools required by K3d:
 
 ```bash
-cd /iot/p3/scripts
+cd <project_dir>/p3/scripts
 ./dependency-check.sh
 newgrp docker
 ```
@@ -409,7 +409,7 @@ Two Vagrant machines are created:
 - `<login>SW`: K3s agent at `192.168.56.111`, 1 CPU and 512 MiB.
 
 ```bash
-cd /iot/p1
+cd <project_dir>/p1
 make up
 vagrant status
 vagrant ssh <login>S
@@ -417,7 +417,7 @@ k get nodes -o wide
 k get pods -A
 ```
 
-Both nodes must be `Ready`. Clean with `make clean` from `/iot/p1`.
+Both nodes must be `Ready`. Clean with `make clean` from `<project_dir>/p1`.
 
 ## Part 2 - K3s and three applications
 
@@ -431,7 +431,7 @@ Ingress Nginx routes requests according to the `Host` header:
 | other or missing | `app-three` | 1 |
 
 ```bash
-cd /iot/p2
+cd <project_dir>/p2
 make
 vagrant ssh <login>S
 kubectl get deployments,pods,services
@@ -441,7 +441,7 @@ curl -H 'Host: app2.com' http://192.168.56.110
 curl http://192.168.56.110
 ```
 
-Clean with `make clean` from `/iot/p2`.
+Clean with `make clean` from `<project_dir>/p2`.
 
 ## Part 3 - K3d and Argo CD
 
@@ -464,7 +464,7 @@ changes, update `repoURL` in `p3/confs/argocd-application.yaml`.
 Install and check:
 
 ```bash
-cd /iot/p3/scripts
+cd <project_dir>/p3/scripts
 make
 sudo k3d cluster list
 sudo kubectl get nodes
@@ -502,7 +502,7 @@ sudo kubectl get pods -n dev
 curl http://localhost:8888
 ```
 
-Clean with `make clean` from `/iot/p3/scripts`.
+Clean with `make clean` from `<project_dir>/p3/scripts`.
 
 ## Bonus - GitLab
 
@@ -511,7 +511,7 @@ and Redis are deployed as lightweight external dependencies. The script copies
 the `app` branch to a local GitLab repository and configures Argo CD to use it.
 
 ```bash
-cd /iot/bonus/scripts
+cd <project_dir>/bonus/scripts
 make
 sudo kubectl get pods -n gitlab
 sudo kubectl get ingress -A
@@ -527,7 +527,7 @@ Argo CD: http://argocd.localhost
 Application: http://localhost:8888
 ```
 
-Clean with `make clean` from `/iot/bonus/scripts`.
+Clean with `make clean` from `<project_dir>/bonus/scripts`.
 
 ## Troubleshooting
 
