@@ -3,11 +3,17 @@
 global:
   ingress:
     configureCertmanager: false
-    class: "nginx" # Note: Nginx is no longer the default in v10; Envoy is preferred, but Minikube often uses the Nginx addon.
+    # No explicit class: use the cluster default (Traefik on k3s/k3d)
   hosts:
     domain: gitlab.localhost
     externalIP: 0.0.0.0
     https: false
+
+  # v10 routes through Gateway API (Envoy) by default: revert to classic Ingress
+  gatewayApi:
+    enabled: false
+    installEnvoy: false
+    configureCertmanager: false
 
   # Configuration for connecting to external PostgreSQL
   psql:
@@ -27,14 +33,16 @@ global:
       secret: gitlab-redis-password # This Kubernetes secret is created by the installation script
       key: redis-password
 
-  # Object storage configuration (required for many features)
-  # If you install external MinIO through bitnami/minio:
+  # No object storage backend in this setup: disable every storage-backed feature
   appConfig:
-    object_store:
-      enabled: true
-      connection:
-        secret: gitlab-minio-secret # This secret is created with the S3 connection details
-        key: connection
+    artifacts:
+      enabled: false
+    lfs:
+      enabled: false
+    uploads:
+      enabled: false
+    packages:
+      enabled: false
 
 # Explicitly disable bundled components (required for v10+)
 postgresql:
@@ -43,6 +51,13 @@ redis:
   install: false
 minio:
   install: false
+
+# v10+ ships no object storage for the registry: disable it entirely
+registry:
+  enabled: false
+
+certmanager-issuer:
+  email: admin@gitlab.localhost
 
 # Remaining minimal configuration
 installCertmanager: false
@@ -53,6 +68,10 @@ prometheus:
 gitlab-runner:
   install: false
 gitlab:
+  # Toolbox (rake tasks/backup runner) renders broken specs without object storage
+  toolbox:
+    enabled: false
+    replicas: 0
   webservice:
     minReplicas: 1
     maxReplicas: 1

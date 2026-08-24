@@ -20,7 +20,6 @@ ARGOCD_PASSWORD=$(sudo kubectl -n argocd get secret argocd-initial-admin-secret 
 GITLAB_PASSWORD=$(sudo kubectl -n gitlab get secret gitlab-gitlab-initial-root-password -o jsonpath="{.data.password}" 2>/dev/null | base64 -d 2>/dev/null || echo "To retrieve")
 POSTGRES_PASSWORD=$(sudo kubectl -n gitlab get secret gitlab-postgresql-password -o jsonpath="{.data.postgresql-password}" 2>/dev/null | base64 -d 2>/dev/null || echo "To retrieve")
 REDIS_PASSWORD=$(sudo kubectl -n gitlab get secret gitlab-redis-password -o jsonpath="{.data.redis-password}" 2>/dev/null | base64 -d 2>/dev/null || echo "To retrieve")
-MINIO_PASSWORD=$(sudo kubectl -n gitlab get secret gitlab-minio-password -o jsonpath="{.data.minio-password}" 2>/dev/null | base64 -d 2>/dev/null || echo "To retrieve")
 echo ""
 note "╔════════════════════════════════════════════════════════════╗ "
 note "║          ✅ Installation Successful!                       ║ "
@@ -38,7 +37,6 @@ note "║  ├─ GitLab user:   root                                    ║ "
 note "║  └─ GitLab pass:   ${GITLAB_PASSWORD}                      ║ "
 note "║  ├─ PostgreSQL:    ${POSTGRES_PASSWORD}                    ║ "
 note "║  ├─ Redis:         ${REDIS_PASSWORD}                       ║ "
-note "║  └─ MinIO:         ${MINIO_PASSWORD}                       ║ "
 note "║                                                            ║ "
 note "║  🛠️  USEFUL COMMANDS                                       ║ "
 note "║  ├─ kubectl:       sudo kubectl get pods -A                ║ "

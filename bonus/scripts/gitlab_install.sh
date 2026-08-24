@@ -62,9 +62,12 @@ get_or_generate_password() {
 }
 
 PGPASSWORD=$(get_or_generate_password gitlab-postgresql-password postgresql-password)
+# Bitnami moved its free images to 'bitnamilegacy' (Aug 2025): override the repository
 sudo helm upgrade --install gitlab-postgresql bitnami/postgresql \
   --namespace gitlab \
+  --set image.repository=bitnamilegacy/postgresql \
   --set image.tag=17 \
+  --set metrics.enabled=false \
   --set-string auth.postgresPassword="$PGPASSWORD" \
   --set auth.database=gitlabhq_production \
   --set primary.resources.requests.memory=256Mi \
@@ -79,15 +82,6 @@ sudo helm upgrade --install gitlab-redis bitnami/redis \
   --set master.resources.requests.memory=128Mi \
   --set master.resources.requests.cpu=50m
 
-
-MINIO_PASSWORD=$(get_or_generate_password gitlab-minio-password minio-password)
-sudo helm upgrade --install gitlab-minio bitnami/minio \
-  --namespace gitlab \
-  --set auth.rootUser=minioadmin \
-  --set-string auth.rootPassword="$MINIO_PASSWORD" \
-  --set defaultBuckets="gitlab-artifacts,gitlab-lfs,gitlab-packages,gitlab-uploads" \
-  --set resources.requests.memory=128Mi
-
 # PostgreSQL secret
 sudo kubectl create secret generic gitlab-postgresql-password \
   --namespace gitlab \
@@ -98,28 +92,6 @@ sudo kubectl create secret generic gitlab-postgresql-password \
 sudo kubectl create secret generic gitlab-redis-password \
   --namespace gitlab \
   --from-literal=redis-password="$REDISPASSWORD" \
-  --dry-run=client -o yaml | sudo kubectl apply -f -
-
-# MinIO secret (S3 connection configuration)
-OBJECT_STORAGE_FILE=$(mktemp)
-trap 'rm -f "$OBJECT_STORAGE_FILE"' EXIT
-cat <<EOF > "$OBJECT_STORAGE_FILE"
-provider: AWS
-region: us-east-1
-endpoint: http://gitlab-minio.gitlab.svc.cluster.local:9000
-aws_access_key_id: minioadmin
-aws_secret_access_key: $MINIO_PASSWORD
-path_style: true
-EOF
-
-sudo kubectl create secret generic gitlab-minio-secret \
-  --namespace gitlab \
-  --from-file=connection="$OBJECT_STORAGE_FILE" \
-  --dry-run=client -o yaml | sudo kubectl apply -f -
-
-sudo kubectl create secret generic gitlab-minio-password \
-  --namespace gitlab \
-  --from-literal=minio-password="$MINIO_PASSWORD" \
   --dry-run=client -o yaml | sudo kubectl apply -f -
 
 # ===============================================================
@@ -148,6 +120,7 @@ fi
 sudo helm upgrade --install gitlab gitlab/gitlab \
   -n gitlab \
   --wait --timeout 10m \
+  --skip-crds \
   -f "$CONF_DIR/gitlab-value.yaml"
 
 # ===============================================================

@@ -60,8 +60,9 @@ sudo rm -f /usr/local/bin/k3d && ok "k3d removed"
 sudo helm repo remove gitlab 2>/dev/null && ok "GitLab Helm repo removed" || warn "GitLab Helm repo not found"
 sudo rm -f /usr/local/bin/helm && ok "Helm removed"
 
-# Remove k9s
-sudo rm -f ~/.local/bin/k9s && ok "k9s removed"
+# Remove k9s (installed both in ~/.local/bin and /usr/local/bin)
+sudo rm -f "$HOME/.local/bin/k9s" && ok "k9s removed"
+sudo rm -f /usr/local/bin/k9s
 
 # Cleanup docker.io k3d images
 sudo docker rmi -f $(sudo docker images --filter=reference='rancher/k3s*' -q) 2>/dev/null && ok "k3s images removed"
