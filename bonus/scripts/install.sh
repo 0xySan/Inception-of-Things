@@ -48,7 +48,7 @@ sudo k3d cluster create inception-of-things --agents 2 \
   --port "443:443@loadbalancer" \
   --port "8080:8080@loadbalancer" \
   --port "8181:8181@loadbalancer" \
-    --port "8888:8888@loadbalancer" > /dev/null 2>&1 && echo "  ✓ Cluster created"
+    --port "8888:80@loadbalancer" > /dev/null 2>&1 && echo "  ✓ Cluster created"
 
 # ===============================================================
 # Kubeconfig - Configuration

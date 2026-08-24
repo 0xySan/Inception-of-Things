@@ -1,47 +1,58 @@
 #!/bin/bash
-# ===============================================================
-#  EEEEE    M   M     A     I    L        L        EEEEE    TTTTT
-#  E        MM MM    A A    I    L        L        E          T
-#  EEEE     M M M   AAAAA   I    L        L        EEEE       T
-#  E        M   M   A   A   I    L        L        E          T
-#  EEEEE    M   M   A   A   I    LLLLL    LLLLL    EEEEE      T
-# ===============================================================
 
-# ===============================================================
-# Information
-# ===============================================================
+set -u
 
-BG_WHITE="\t\033[48;2;255;255;255m"
-FG_BLACK="\033[38;2;0;0;0m"
-RESET="\033[0m"
+RESET='\033[0m'
+BOLD='\033[1m'
+CYAN='\033[36m'
+BLUE='\033[34m'
+GREEN='\033[32m'
+YELLOW='\033[33m'
+WHITE='\033[97m'
+GRAY='\033[90m'
 
-note() { echo -e "${BG_WHITE}${FG_BLACK} $*${RESET}"; }
-ARGOCD_PASSWORD=$(sudo kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" 2>/dev/null | base64 -d 2>/dev/null || echo "To retrieve")
-GITLAB_PASSWORD=$(sudo kubectl -n gitlab get secret gitlab-gitlab-initial-root-password -o jsonpath="{.data.password}" 2>/dev/null | base64 -d 2>/dev/null || echo "To retrieve")
-POSTGRES_PASSWORD=$(sudo kubectl -n gitlab get secret gitlab-postgresql-password -o jsonpath="{.data.postgresql-password}" 2>/dev/null | base64 -d 2>/dev/null || echo "To retrieve")
-REDIS_PASSWORD=$(sudo kubectl -n gitlab get secret gitlab-redis-password -o jsonpath="{.data.redis-password}" 2>/dev/null | base64 -d 2>/dev/null || echo "To retrieve")
-echo ""
-note "╔════════════════════════════════════════════════════════════╗ "
-note "║          ✅ Installation Successful!                       ║ "
-note "╠════════════════════════════════════════════════════════════╣ "
-note "║  📊 SERVICES                                               ║ "
-note "║  ├─ ArgoCD:        http://argocd.localhost                 ║ "
-note "║  ├─ Application:   http://localhost                        ║ "
-note "║  ├─ GitLab:        http://gitlab.localhost                 ║ "
-note "║  └─ K3D Cluster:   inception-of-things (3 nodes)           ║ "
-note "║                                                            ║ "
-note "║  🔑 AUTHENTICATION                                         ║ "
-note "║  ├─ Username:      admin                                   ║ "
-note "║  └─ Password:      ${ARGOCD_PASSWORD}                      ║ "
-note "║  ├─ GitLab user:   root                                    ║ "
-note "║  └─ GitLab pass:   ${GITLAB_PASSWORD}                      ║ "
-note "║  ├─ PostgreSQL:    ${POSTGRES_PASSWORD}                    ║ "
-note "║  ├─ Redis:         ${REDIS_PASSWORD}                       ║ "
-note "║                                                            ║ "
-note "║  🛠️  USEFUL COMMANDS                                       ║ "
-note "║  ├─ kubectl:       sudo kubectl get pods -A                ║ "
-note "║  ├─ k9s (TUI):     sudo k9s                                ║ "
-note "║  ├─ Uninstall:     bash Scripts/uninstall.sh               ║ "
-note "║  └─ Refresh:       kubectl get cronjob,jobs,pods -n argocd ║ "
-note "╚════════════════════════════════════════════════════════════╝ "
-echo ""
+ARGOCD_PASSWORD=$(sudo kubectl -n argocd get secret argocd-initial-admin-secret \
+  -o jsonpath='{.data.password}' 2>/dev/null | base64 -d 2>/dev/null || printf '%s' 'unavailable')
+GITLAB_PASSWORD=$(sudo kubectl -n gitlab get secret gitlab-gitlab-initial-root-password \
+  -o jsonpath='{.data.password}' 2>/dev/null | base64 -d 2>/dev/null || printf '%s' 'unavailable')
+
+section() {
+  printf '\n%b%s%b\n' "$BLUE$BOLD" "$1" "$RESET"
+  printf '%b────────────────────────────────────────────────────────────%b\n' "$GRAY" "$RESET"
+}
+
+row() {
+  printf '  %b%-18s%b %s\n' "$CYAN" "$1" "$RESET" "$2"
+}
+
+printf '\n%b╭────────────────────────────────────────────────────────────╮%b\n' "$CYAN" "$RESET"
+printf '%b│%b  %bINCEPTION OF THINGS%b  %b· Bonus GitLab%b                  %b│%b\n' \
+  "$CYAN" "$RESET" "$BOLD$WHITE" "$RESET" "$GRAY" "$RESET" "$CYAN" "$RESET"
+printf '%b╰────────────────────────────────────────────────────────────╯%b\n' "$CYAN" "$RESET"
+
+section 'SERVICES'
+row 'Argo CD' 'http://argocd.localhost'
+row 'GitLab' 'http://gitlab.localhost'
+row 'Application' 'http://localhost:8888'
+row 'Cluster' 'inception-of-things · 1 server + 2 agents'
+
+section 'ACCESS'
+row 'Argo CD user' 'admin'
+row 'Argo CD password' "$ARGOCD_PASSWORD"
+row 'GitLab user' 'root'
+row 'GitLab password' "$GITLAB_PASSWORD"
+
+section 'GITOPS'
+row 'Repository' 'gitlab.localhost/root/gitops_argocd.git'
+row 'Namespace' 'dev'
+printf '  %b$%b kubectl get application dev-app -n argocd -o wide\n' "$GREEN" "$RESET"
+printf '  %b$%b curl http://localhost:8888\n' "$GREEN" "$RESET"
+
+section 'TOOLS'
+printf '  %b%s%b  kubectl get pods -A\n' "$YELLOW" 'CHECK' "$RESET"
+printf '  %b%s%b  kubectl get cronjob,jobs,pods -n argocd\n' "$YELLOW" 'SYNC' "$RESET"
+printf '  %b%s%b  k9s\n' "$YELLOW" 'TUI' "$RESET"
+printf '  %b%s%b  make clean\n' "$YELLOW" 'STOP' "$RESET"
+
+printf '\n%bTip:%b the GitLab host is generated from domain %blocalhost%b.\n\n' \
+  "$GRAY" "$RESET" "$WHITE" "$RESET"

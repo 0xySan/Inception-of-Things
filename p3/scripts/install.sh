@@ -47,7 +47,7 @@ sudo k3d cluster create inception-of-things --agents 2 \
   --port "80:80@loadbalancer" \
   --port "443:443@loadbalancer" \
   --port "8080:8080@loadbalancer" \
-    --port "8888:8888@loadbalancer" > /dev/null 2>&1 && echo "  ✓ Cluster created"
+    --port "8888:80@loadbalancer" > /dev/null 2>&1 && echo "  ✓ Cluster created"
 
 # ===============================================================
 # Kubeconfig - Configuration
@@ -73,7 +73,6 @@ ok "Kubeconfig configured"
 info "Creating namespaces..."
 sudo kubectl create namespace argocd 2>/dev/null || true
 sudo kubectl create namespace dev 2>/dev/null || true
-sudo kubectl create namespace gitlab 2>/dev/null || true
 ok "Namespaces ready"
 
 # ===============================================================
@@ -107,11 +106,11 @@ info "Installing ArgoCD..."
 bash "$SCRIPT_DIR/argocd_install.sh" && echo "  ✓ ArgoCD deployed"
 
 # ===============================================================
-# Gitlab - GitOps Setup
+# Mandatory GitOps setup
 # ===============================================================
 
-info "Setting up Gitlab for GitOps..."
-bash "$SCRIPT_DIR/gitlab_gitops_setup.sh" && echo "  ✓ Gitlab configured for GitOps"
+info "Using the public GitHub repository for GitOps..."
+echo "  ✓ GitHub repository configured"
 
 
 # ===============================================================

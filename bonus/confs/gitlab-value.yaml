@@ -5,7 +5,10 @@ global:
     configureCertmanager: false
     # No explicit class: use the cluster default (Traefik on k3s/k3d)
   hosts:
-    domain: gitlab.localhost
+    # The GitLab chart adds the "gitlab" subdomain automatically.
+    # Using gitlab.localhost here would therefore generate
+    # gitlab.gitlab.localhost.
+    domain: localhost
     externalIP: 0.0.0.0
     https: false
 
