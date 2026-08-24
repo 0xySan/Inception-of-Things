@@ -102,13 +102,13 @@ ok "Ingress configured"
 # ===============================================================
 
 info "Installing Helm..."
-bash "$SCRIPT_DIR/helm_install.sh" > /dev/null 2>&1 && echo "  ✓ Helm installed"
+bash "$SCRIPT_DIR/helm_install.sh" > /dev/null 2>&1 && ok "  ✓ Helm installed"
 
 info "Installing Gitlab..."
-bash "$SCRIPT_DIR/gitlab_install.sh" && echo "  ✓ Gitlab deployed"
+bash "$SCRIPT_DIR/gitlab_install.sh" && ok "  ✓ Gitlab deployed"
 
 info "Installing ArgoCD..."
-bash "$SCRIPT_DIR/argocd_install.sh" && echo "  ✓ ArgoCD deployed"
+bash "$SCRIPT_DIR/argocd_install.sh" && ok "  ✓ ArgoCD deployed"
 
 # ===============================================================
 # Gitlab - GitOps Setup

@@ -13,6 +13,7 @@ set -euo pipefail
 # Lightweight Gitlab Installation via Helm
 # ===============================================================
 
+
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
 CONF_DIR="$SCRIPT_DIR/../confs"
 
@@ -29,11 +30,103 @@ info() { echo -e "${BG_BLUE}${FG_WHITE} [INFO] ${RESET} $*"; }
 error() { echo -e "${BG_RED}${FG_WHITE} [FAIL] ${RESET} $*"; }
 ok() { echo -e "${BG_GREEN}${FG_WHITE} [ OK ] ${RESET} $*"; }
 
+
 # ===============================================================
-# Helm Configuration
+# Install Gitlab 10.0+ external tools
 # ===============================================================
 
-info "Adding Gitlab Helm repo..."
+# 1. Namespace
+sudo kubectl create namespace gitlab --dry-run=client -o yaml | sudo kubectl apply -f -
+
+sudo helm repo add bitnami https://charts.bitnami.com/bitnami || true
+sudo helm repo update
+
+generate_password() {
+  openssl rand -hex 16
+}
+
+get_or_generate_password() {
+  local secret_name=$1
+  local secret_key=$2
+  local password
+
+  password=$(sudo kubectl get secret "$secret_name" \
+    --namespace gitlab \
+    -o "jsonpath={.data.$secret_key}" 2>/dev/null | base64 --decode || true)
+
+  if [ -n "$password" ]; then
+    printf '%s' "$password"
+  else
+    generate_password
+  fi
+}
+
+PGPASSWORD=$(get_or_generate_password gitlab-postgresql-password postgresql-password)
+sudo helm upgrade --install gitlab-postgresql bitnami/postgresql \
+  --namespace gitlab \
+  --set image.tag=17 \
+  --set-string auth.postgresPassword="$PGPASSWORD" \
+  --set auth.database=gitlabhq_production \
+  --set primary.resources.requests.memory=256Mi \
+  --set primary.resources.requests.cpu=100m
+
+
+REDISPASSWORD=$(get_or_generate_password gitlab-redis-password redis-password)
+sudo helm upgrade --install gitlab-redis bitnami/redis \
+  --namespace gitlab \
+  --set-string auth.password="$REDISPASSWORD" \
+  --set architecture=standalone \
+  --set master.resources.requests.memory=128Mi \
+  --set master.resources.requests.cpu=50m
+
+
+MINIO_PASSWORD=$(get_or_generate_password gitlab-minio-password minio-password)
+sudo helm upgrade --install gitlab-minio bitnami/minio \
+  --namespace gitlab \
+  --set auth.rootUser=minioadmin \
+  --set-string auth.rootPassword="$MINIO_PASSWORD" \
+  --set defaultBuckets="gitlab-artifacts,gitlab-lfs,gitlab-packages,gitlab-uploads" \
+  --set resources.requests.memory=128Mi
+
+# PostgreSQL secret
+sudo kubectl create secret generic gitlab-postgresql-password \
+  --namespace gitlab \
+  --from-literal=postgresql-password="$PGPASSWORD" \
+  --dry-run=client -o yaml | sudo kubectl apply -f -
+
+# Redis secret
+sudo kubectl create secret generic gitlab-redis-password \
+  --namespace gitlab \
+  --from-literal=redis-password="$REDISPASSWORD" \
+  --dry-run=client -o yaml | sudo kubectl apply -f -
+
+# MinIO secret (S3 connection configuration)
+OBJECT_STORAGE_FILE=$(mktemp)
+trap 'rm -f "$OBJECT_STORAGE_FILE"' EXIT
+cat <<EOF > "$OBJECT_STORAGE_FILE"
+provider: AWS
+region: us-east-1
+endpoint: http://gitlab-minio.gitlab.svc.cluster.local:9000
+aws_access_key_id: minioadmin
+aws_secret_access_key: $MINIO_PASSWORD
+path_style: true
+EOF
+
+sudo kubectl create secret generic gitlab-minio-secret \
+  --namespace gitlab \
+  --from-file=connection="$OBJECT_STORAGE_FILE" \
+  --dry-run=client -o yaml | sudo kubectl apply -f -
+
+sudo kubectl create secret generic gitlab-minio-password \
+  --namespace gitlab \
+  --from-literal=minio-password="$MINIO_PASSWORD" \
+  --dry-run=client -o yaml | sudo kubectl apply -f -
+
+# ===============================================================
+# Helm Configuration for gitlab
+# ===============================================================
+
+info "Adding GitLab Helm repo..."
 sudo helm repo add gitlab https://charts.gitlab.io/ || true
 
 info "Updating Helm repositories..."
@@ -52,15 +145,14 @@ fi
 # Gitlab Installation
 # ===============================================================
 
-info "Installing Gitlab..."
 sudo helm upgrade --install gitlab gitlab/gitlab \
   -n gitlab \
-  -f "$CONF_DIR/gitlab-value.yaml" \
-  --version "9.11.12" \
-  --wait --timeout 30m || error "Gitlab installation failed"
+  --wait --timeout 10m \
+  -f "$CONF_DIR/gitlab-value.yaml"
+
 # ===============================================================
 # Final Check
 # ===============================================================
 
-ok "Gitlab deployment completed successfully"
+ok "GitLab deployment completed successfully"
 sudo helm list -n gitlab
