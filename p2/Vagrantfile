@@ -16,6 +16,7 @@ Vagrant.configure("2") do |config|
     control.vm.provider :libvirt do |v|
       v.memory = 2048
       v.cpus = 2
+      v.driver = "qemu"
     end
 
     control.vm.provision "shell", env: {"K3S_TOKEN" => token}, inline: <<-SHELL
