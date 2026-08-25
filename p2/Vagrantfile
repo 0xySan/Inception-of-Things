@@ -4,8 +4,8 @@ Vagrant.configure("2") do |config|
   config.vm.box = "debian/trixie64"
 
   config.vm.synced_folder ".", "/vagrant", disabled: true
-  config.vm.synced_folder "./scripts", "/var/www/html", create: true
-  config.vm.synced_folder "./confs", "/confs", create: true
+  config.vm.synced_folder "./scripts", "/var/www/html", create: true, type: "rsync", rsync__exclude: [".git/"]
+  config.vm.synced_folder "./confs", "/confs", create: true, type: "rsync", rsync__exclude: [".git/"]
 
   config.vm.define "etaquetS" do |control|
     control.vm.hostname = "etaquetS"
