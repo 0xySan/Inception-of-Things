@@ -33,10 +33,11 @@ cd <project_dir>
 ./vagrant-dep.sh
 ```
 
-Le script detecte automatiquement Debian (`apt`) ou Arch Linux (`pacman`). Il
+Le script detecte automatiquement Debian (`apt`) ou Arch Linux (`yay`). Il
 installe les dependances KVM/libvirt, active libvirt, configure les droits
-utilisateur et installe le provider Vagrant libvirt. Ouvrir une nouvelle
-session apres son execution.
+utilisateur, installe le provider Vagrant libvirt et ajoute les regles
+necessaires au pare-feu existant pour le reseau prive Vagrant. Ouvrir une
+nouvelle session apres son execution.
 
 Pour une installation manuelle, le provider peut etre installe avec :
 
@@ -486,10 +487,11 @@ cd <project_dir>
 ./vagrant-dep.sh
 ```
 
-The script automatically detects Debian (`apt`) or Arch Linux (`pacman`). It
+The script automatically detects Debian (`apt`) or Arch Linux (`yay`). It
 installs KVM/libvirt and Vagrant dependencies, enables libvirt, configures user
-permissions and installs the Vagrant libvirt provider. Open a new session after
-running it.
+permissions, installs the Vagrant libvirt provider and adds the required rules
+to the existing firewall for the Vagrant private network. Open a new session
+after running it.
 
 For a manual installation, install the provider with:
 
