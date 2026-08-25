@@ -22,22 +22,24 @@ Les commandes suivantes sont a executer dans la VM, depuis `<project_dir>`.
 ### Debian 13
 
 ```bash
-sudo apt update
-sudo apt install -y qemu-kvm libvirt-daemon-system libvirt-dev ruby-dev \
-  build-essential gcc make vagrant curl ca-certificates git
-sudo systemctl enable --now libvirtd
+cd <project_dir>
+./vagrant-dep.sh
 ```
 
 ### Arch Linux
 
 ```bash
-sudo pacman -Syu --needed qemu-desktop libvirt dnsmasq virt-manager \
-  ruby base-devel gcc make vagrant curl ca-certificates git
-sudo systemctl enable --now libvirtd
-sudo usermod -aG libvirt,kvm "$USER"
+cd <project_dir>
+./vagrant-dep.sh
 ```
 
-Installer le provider Vagrant libvirt :
+Le script detecte automatiquement Debian (`apt`) ou Arch Linux (`yay`). Il
+installe les dependances KVM/libvirt, active libvirt, configure les droits
+utilisateur, installe le provider Vagrant libvirt et ajoute les regles
+necessaires au pare-feu existant pour le reseau prive Vagrant. Ouvrir une
+nouvelle session apres son execution.
+
+Pour une installation manuelle, le provider peut etre installe avec :
 
 ```bash
 vagrant plugin install vagrant-libvirt
@@ -474,22 +476,24 @@ Run the following commands inside the VM.
 ### Debian 13
 
 ```bash
-sudo apt update
-sudo apt install -y qemu-kvm libvirt-daemon-system libvirt-dev ruby-dev \
-  build-essential gcc make vagrant curl ca-certificates git
-sudo systemctl enable --now libvirtd
+cd <project_dir>
+./vagrant-dep.sh
 ```
 
 ### Arch Linux
 
 ```bash
-sudo pacman -Syu --needed qemu-desktop libvirt dnsmasq virt-manager \
-  ruby base-devel gcc make vagrant curl ca-certificates git
-sudo systemctl enable --now libvirtd
-sudo usermod -aG libvirt,kvm "$USER"
+cd <project_dir>
+./vagrant-dep.sh
 ```
 
-Install Vagrant's libvirt provider:
+The script automatically detects Debian (`apt`) or Arch Linux (`yay`). It
+installs KVM/libvirt and Vagrant dependencies, enables libvirt, configures user
+permissions, installs the Vagrant libvirt provider and adds the required rules
+to the existing firewall for the Vagrant private network. Open a new session
+after running it.
+
+For a manual installation, install the provider with:
 
 ```bash
 vagrant plugin install vagrant-libvirt
